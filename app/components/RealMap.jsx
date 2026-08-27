@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useImperativeHandle, forwardRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -15,70 +15,34 @@ const userIcon = L.divIcon({
   iconAnchor: [10, 10]
 });
 
-// Ícone para os Ônibus de Recife
-const busIcon = L.divIcon({
-  className: 'custom-bus-icon',
-  html: `<div style="background-color: #7e22ce; color: white; padding: 5px; border-radius: 50%; border: 2px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.3); font-size: 13px; text-align: center;">🚌</div>`,
-  iconSize: [30, 30],
-  iconAnchor: [15, 15]
-});
-
-// Controlador interno do mapa para ações de navegação
-const MapController = forwardRef(({ userPos, setUserPos }, ref) => {
+// Componente filho para manipular o pan do mapa diretamente
+function MapController({ triggerRecenter, onPosFound }) {
   const map = useMap();
 
-  const goToUserLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          const newPos = [latitude, longitude];
-          setUserPos(newPos);
-          map.flyTo(newPos, 16, { animate: true, duration: 1.5 });
-        },
-        (error) => {
-          alert("Não foi possível obter sua localização. Verifique se o GPS está ativado e se você deu permissão no navegador.");
-        },
-        { enableHighAccuracy: true }
-      );
-    }
-  };
-
-  useImperativeHandle(ref, () => ({
-    centerOnUser: goToUserLocation
-  }));
-
-  // Busca a localização assim que abre o mapa
   useEffect(() => {
-    goToUserLocation();
-  }, []);
+    // Busca localização inicial
+    map.locate({ setView: true, maxZoom: 16 });
 
-  return userPos ? (
-    <Marker position={userPos} icon={userIcon}>
-      <Popup>Você está aqui!</Popup>
-    </Marker>
-  ) : null;
-});
+    map.on('locationfound', (e) => {
+      onPosFound([e.latlng.lat, e.latlng.lng]);
+    });
+  }, [map, onPosFound]);
 
-MapController.displayName = 'MapController';
+  useEffect(() => {
+    if (triggerRecenter > 0) {
+      map.locate({ setView: false }).on('locationfound', (e) => {
+        onPosFound([e.latlng.lat, e.latlng.lng]);
+        map.flyTo(e.latlng, 16, { animate: true, duration: 1.2 });
+      });
+    }
+  }, [triggerRecenter, map, onPosFound]);
 
-const RealMap = forwardRef((props, ref) => {
-  // Posição inicial padrão enquanto carrega o GPS
+  return null;
+}
+
+const RealMap = forwardRef(({ triggerRecenter }, ref) => {
   const [userPos, setUserPos] = useState(null);
-  const defaultCenter = [-8.0631, -34.8711]; // Centro base RMR
-
-  // Rota de teste (Caxangá / TI Recife)
-  const routePolyline = [
-    [-8.0631, -34.8711],
-    [-8.0590, -34.8810],
-    [-8.0520, -34.8950],
-    [-8.0450, -34.9100]
-  ];
-
-  const busPositions = [
-    { id: 1, pos: [-8.0590, -34.8810], name: "Linha 503 - Veículo 104" },
-    { id: 2, pos: [-8.0450, -34.9100], name: "Linha 503 - Veículo 112" }
-  ];
+  const defaultCenter = [-8.0631, -34.8711]; // Centro padrão RMR
 
   return (
     <div className="w-full h-full relative">
@@ -93,15 +57,14 @@ const RealMap = forwardRef((props, ref) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <MapController ref={ref} userPos={userPos} setUserPos={setUserPos} />
+        <MapController triggerRecenter={triggerRecenter} onPosFound={setUserPos} />
 
-        <Polyline positions={routePolyline} color="#7e22ce" weight={5} opacity={0.7} />
-
-        {busPositions.map(bus => (
-          <Marker key={bus.id} position={bus.pos} icon={busIcon}>
-            <Popup>{bus.name}</Popup>
+        {/* Exibe o marcador do usuário no local do GPS */}
+        {userPos && (
+          <Marker position={userPos} icon={userIcon}>
+            <Popup>Você está aqui!</Popup>
           </Marker>
-        ))}
+        )}
       </MapContainer>
     </div>
   );
