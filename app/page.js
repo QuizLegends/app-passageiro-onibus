@@ -1,3 +1,4 @@
+'use client';
 import React, { useState } from 'react';
 import { Search, SlidersHorizontal, MapPin, Navigation, Bus, Route, Heart } from 'lucide-react';
 
