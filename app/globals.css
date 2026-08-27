@@ -1,1 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
+/* Trava total de rolagem para comportamento de App Nativo */
+html, body {
+  height: 100%;
+  height: 100dvh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important;
+  touch-action: manipulation;
+  position: fixed;
+  overscroll-behavior: none;
+}
+
+/* Ajuste nos tiles do Leaflet */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
