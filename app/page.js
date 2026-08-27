@@ -1,34 +1,32 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import { Search, SlidersHorizontal, MapPin, Navigation, Bus, Route, Heart } from 'lucide-react';
 
-// Carrega o mapa no cliente
 const RealMap = dynamic(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
-      Buscando sinal de GPS...
+      Carregando Mapa...
     </div>
   )
 });
 
 export default function AppHome() {
   const [isSaved, setIsSaved] = useState(false);
-  const mapRef = useRef(null);
+  const [recenterCount, setRecenterCount] = useState(0);
 
   const handleLocationClick = () => {
-    if (mapRef.current) {
-      mapRef.current.centerOnUser();
-    }
+    // Força a atualização do GPS e o voo do mapa
+    setRecenterCount(prev => prev + 1);
   };
 
   const currentBus = {
-    number: "503",
-    direction: "Caxangá / TI Recife",
-    stop: "Terminal Praça da República",
-    time: "2 min",
+    number: "Selecione uma linha",
+    direction: "Aguardando busca...",
+    stop: "Toque em buscar para ver paradas",
+    time: "-- min",
     operator: "Grande Recife Consórcio"
   };
 
@@ -54,19 +52,19 @@ export default function AppHome() {
           <span className="text-xs font-semibold text-slate-700">GPS Ativo</span>
         </div>
 
-        {/* Mapa Real com referência para controle de localização */}
-        <RealMap ref={mapRef} />
+        {/* Mapa Real Limpo sem linhas estáticas */}
+        <RealMap triggerRecenter={recenterCount} />
 
         {/* 3. CARD FLUTUANTE DE INFORMAÇÕES */}
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border border-slate-100 z-10">
-          <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Ônibus Recomendado</span>
+          <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Painel de Monitoramento</span>
           
           <div className="flex items-baseline justify-between mt-0.5">
             <h2 className="text-xl font-bold text-purple-900">
-              Linha: {currentBus.number}
+              {currentBus.number}
             </h2>
             <span className="text-xs font-semibold text-slate-600">
-              Sentido: {currentBus.direction}
+              {currentBus.direction}
             </span>
           </div>
 
@@ -75,7 +73,7 @@ export default function AppHome() {
           <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100">
             <div>
               <span className="text-lg font-extrabold text-slate-900">{currentBus.time}</span>
-              <p className="text-[9px] text-slate-400 uppercase font-medium">Operadora: {currentBus.operator}</p>
+              <p className="text-[9px] text-slate-400 uppercase font-medium">{currentBus.operator}</p>
             </div>
 
             <div className="flex gap-2">
@@ -114,7 +112,7 @@ export default function AppHome() {
           <span className="text-[10px] font-medium">Linhas</span>
         </button>
         
-        {/* BOTÃO DA MINHA LOCALIZAÇÃO CONECTADO */}
+        {/* BOTÃO DA MINHA LOCALIZAÇÃO */}
         <button 
           onClick={handleLocationClick}
           className="flex flex-col items-center gap-1 text-white bg-purple-700/50 px-2 py-0.5 rounded-lg active:scale-95 transition-transform"
