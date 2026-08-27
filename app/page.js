@@ -1,21 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { Search, SlidersHorizontal, MapPin, Navigation, Bus, Route, Heart } from 'lucide-react';
 
-// Carrega o mapa dinamicamente apenas no cliente para evitar erros no servidor
+// Carrega o mapa no cliente
 const RealMap = dynamic(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
-      Carregando Mapa de Recife...
+      Buscando sinal de GPS...
     </div>
   )
 });
 
 export default function AppHome() {
   const [isSaved, setIsSaved] = useState(false);
+  const mapRef = useRef(null);
+
+  const handleLocationClick = () => {
+    if (mapRef.current) {
+      mapRef.current.centerOnUser();
+    }
+  };
 
   const currentBus = {
     number: "503",
@@ -34,7 +41,7 @@ export default function AppHome() {
           <SlidersHorizontal className="w-5 h-5 text-purple-200 mr-2 cursor-pointer" />
           <input 
             type="text" 
-            placeholder="Buscar Linha ou Destino em Recife" 
+            placeholder="Buscar Linha ou Destino" 
             className="bg-transparent w-full text-sm text-white placeholder-purple-200 focus:outline-none"
           />
           <Search className="w-5 h-5 text-purple-200 cursor-pointer" />
@@ -43,13 +50,12 @@ export default function AppHome() {
 
       {/* 2. ÁREA DO MAPA REAL */}
       <main className="flex-1 relative w-full overflow-hidden">
-        {/* Badge da Região */}
         <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-1 rounded-full shadow-md z-10 border border-slate-200">
-          <span className="text-xs font-semibold text-slate-700">Foco em Recife, PE</span>
+          <span className="text-xs font-semibold text-slate-700">GPS Ativo</span>
         </div>
 
-        {/* Componente do Mapa Leaflet/OpenStreetMap */}
-        <RealMap />
+        {/* Mapa Real com referência para controle de localização */}
+        <RealMap ref={mapRef} />
 
         {/* 3. CARD FLUTUANTE DE INFORMAÇÕES */}
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border border-slate-100 z-10">
@@ -95,7 +101,7 @@ export default function AppHome() {
 
       {/* 4. BARRA DE NAVEGAÇÃO INFERIOR */}
       <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
-        <button className="flex flex-col items-center gap-1 text-white">
+        <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Route className="w-5 h-5" />
           <span className="text-[10px] font-medium">Rotas</span>
         </button>
@@ -107,9 +113,14 @@ export default function AppHome() {
           <Bus className="w-5 h-5" />
           <span className="text-[10px] font-medium">Linhas</span>
         </button>
-        <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
-          <Navigation className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Minha localização</span>
+        
+        {/* BOTÃO DA MINHA LOCALIZAÇÃO CONECTADO */}
+        <button 
+          onClick={handleLocationClick}
+          className="flex flex-col items-center gap-1 text-white bg-purple-700/50 px-2 py-0.5 rounded-lg active:scale-95 transition-transform"
+        >
+          <Navigation className="w-5 h-5 text-cyan-300" />
+          <span className="text-[10px] font-bold text-cyan-300">Minha localização</span>
         </button>
       </nav>
 
