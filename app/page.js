@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 import SearchHeader from './components/SearchHeader';
-import { MapPin, Navigation, Bus, Route, Heart } from 'lucide-react';
+import { MapPin, Navigation, Bus, Route, Footprints, ChevronRight } from 'lucide-react';
 
 const RealMap = dynamic(() => import('./components/RealMap'), {
   ssr: false,
@@ -15,9 +15,10 @@ const RealMap = dynamic(() => import('./components/RealMap'), {
 });
 
 export default function AppHome() {
-  const [isSaved, setIsSaved] = useState(false);
   const [recenterCount, setRecenterCount] = useState(0);
   const [selectedDestination, setSelectedDestination] = useState(null);
+  const [nearestStop, setNearestStop] = useState(null);
+  const [focusStopTrigger, setFocusStopTrigger] = useState(0);
 
   const handleLocationClick = () => {
     setRecenterCount((prev) => prev + 1);
@@ -25,39 +26,82 @@ export default function AppHome() {
 
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
+    setNearestStop(null); // Reseta a parada ao escolher um novo destino
+  };
+
+  const handleCardClick = () => {
+    if (nearestStop) {
+      setFocusStopTrigger((prev) => prev + 1);
+    }
   };
 
   return (
     <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-slate-100 font-sans relative overflow-hidden shadow-2xl touch-none">
       
-      {/* 1. CABEÇALHO COM BUSCA REAL */}
+      {/* CABEÇALHO COM DESTAQUE DE BUSCA */}
       <header className="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 pt-6 text-white rounded-b-2xl shadow-lg z-20 shrink-0">
         <SearchHeader onSelectDestination={handleSelectDestination} />
       </header>
 
-      {/* 2. ÁREA DO MAPA REAL */}
+      {/* MAPA PRINCIPAL */}
       <main className="flex-1 relative w-full overflow-hidden">
-        <RealMap triggerRecenter={recenterCount} targetDestination={selectedDestination} />
+        <RealMap 
+          triggerRecenter={recenterCount} 
+          targetDestination={selectedDestination}
+          onNearestStopFound={setNearestStop}
+          focusStopTrigger={focusStopTrigger}
+        />
 
-        {/* CARD FLUTUANTE DE INFORMAÇÕES */}
-        <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-xl border border-slate-100 z-10">
+        {/* CARD INFERIOR INTERATIVO */}
+        <div 
+          onClick={handleCardClick}
+          className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 cursor-pointer transition-all active:scale-98"
+        >
           {selectedDestination ? (
             <div>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Destino Selecionado</span>
-              <h2 className="text-lg font-bold text-purple-900 truncate">{selectedDestination.name}</h2>
-              <p className="text-xs text-slate-600 mt-1">Calculando melhor parada de embarque...</p>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
+                <div>
+                  <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Destino Selecionado</span>
+                  <h2 className="text-base font-bold text-slate-800 truncate">{selectedDestination.name}</h2>
+                </div>
+                <ChevronRight className="w-5 h-5 text-slate-400" />
+              </div>
+
+              {nearestStop ? (
+                <div className="flex items-center justify-between bg-purple-50 p-2.5 rounded-2xl border border-purple-100">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
+                      <Footprints className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-bold text-slate-800 truncate">{nearestStop.name}</span>
+                      <span className="text-[11px] text-emerald-700 font-semibold">
+                        A {nearestStop.distance}m • ~{Math.ceil(nearestStop.distance / 80)} min a pé
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-[10px] bg-white text-purple-700 font-bold px-2 py-1 rounded-lg border border-purple-200 shrink-0 ml-2">
+                    Ver no mapa
+                  </span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 py-1">
+                  <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-xs text-slate-600 font-medium">Localizando parada de embarque mais próxima...</p>
+                </div>
+              )}
             </div>
           ) : (
             <div>
               <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Painel de Mobilidade</span>
               <h2 className="text-base font-bold text-purple-900">Digite seu destino para buscar rotas</h2>
-              <p className="text-xs text-slate-600 mt-0.5">Busque por ruas, bairros ou linhas de Recife e Região.</p>
+              <p className="text-xs text-slate-600 mt-0.5">Busque por ruas, bairros ou locais de Recife e Jaboatão.</p>
             </div>
           )}
         </div>
       </main>
 
-      {/* 3. BARRA DE NAVEGAÇÃO INFERIOR */}
+      {/* BARRA INFERIOR DE NAVEGAÇÃO */}
       <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
         <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Route className="w-5 h-5" />
