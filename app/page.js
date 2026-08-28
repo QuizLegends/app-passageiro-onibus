@@ -5,13 +5,13 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import dynamicNext from 'next/dynamic';
 import SearchHeader from './components/SearchHeader';
-import { MapPin, Navigation, Bus, Route, Footprints, ChevronRight } from 'lucide-react';
+import { MapPin, Navigation, Bus, Route, Footprints, Clock, Navigation2 } from 'lucide-react';
 
 const RealMap = dynamicNext(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
-      Carregando Mapa...
+      Carregando Mapa de Paradas...
     </div>
   )
 });
@@ -19,8 +19,8 @@ const RealMap = dynamicNext(() => import('./components/RealMap'), {
 export default function AppHome() {
   const [recenterCount, setRecenterCount] = useState(0);
   const [selectedDestination, setSelectedDestination] = useState(null);
-  const [nearestStop, setNearestStop] = useState(null);
-  const [focusStopTrigger, setFocusStopTrigger] = useState(0);
+  const [activeStop, setActiveStop] = useState(null);
+  const [selectedStopForRoute, setSelectedStopForRoute] = useState(null);
 
   const handleLocationClick = () => {
     setRecenterCount((prev) => prev + 1);
@@ -28,13 +28,16 @@ export default function AppHome() {
 
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
-    setNearestStop(null);
   };
 
-  // Dispara a animação de focar na parada no mapa
-  const handleFocusStop = (e) => {
-    if (e) e.stopPropagation();
-    setFocusStopTrigger((prev) => prev + 1);
+  const handleSelectStop = (stop) => {
+    setActiveStop(stop);
+  };
+
+  const handleStartRouteToStop = () => {
+    if (activeStop) {
+      setSelectedStopForRoute(activeStop);
+    }
   };
 
   return (
@@ -50,60 +53,58 @@ export default function AppHome() {
         <RealMap 
           triggerRecenter={recenterCount} 
           targetDestination={selectedDestination}
-          onNearestStopFound={setNearestStop}
-          focusStopTrigger={focusStopTrigger}
+          onSelectStop={handleSelectStop}
+          selectedStopForRoute={selectedStopForRoute}
         />
 
-        {/* CARD INFERIOR */}
-        <div 
-          onClick={handleFocusStop}
-          className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 cursor-pointer transition-all active:scale-98"
-        >
-          {selectedDestination ? (
+        {/* CARD INFERIOR DINÂMICO */}
+        <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 transition-all">
+          {activeStop ? (
             <div>
               <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-                <div>
-                  <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Destino Selecionado</span>
-                  <h2 className="text-base font-bold text-slate-800 truncate">{selectedDestination.name}</h2>
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
+                    <Bus className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Parada Selecionada</span>
+                    <h2 className="text-sm font-bold text-slate-800 truncate">{activeStop.name}</h2>
+                  </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-slate-400" />
               </div>
 
-              {nearestStop ? (
-                <div className="flex items-center justify-between bg-purple-50 p-2.5 rounded-2xl border border-purple-100">
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
-                      <Footprints className="w-4 h-4" />
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-xs font-bold text-slate-800 truncate">{nearestStop.name}</span>
-                      <span className="text-[11px] text-emerald-700 font-semibold">
-                        A {nearestStop.distance}m • ~{Math.ceil(nearestStop.distance / 80)} min a pé
-                      </span>
+              {/* LISTA DE HORÁRIOS NA PARADA */}
+              <div className="space-y-1.5 my-3">
+                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 mb-1">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>Próximas chegadas nesta parada:</span>
+                </div>
+                {activeStop.schedules && activeStop.schedules.map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
+                    <span className="text-xs font-bold text-slate-700">{item.line}</span>
+                    <div className="text-right">
+                      <span className="text-xs font-bold text-emerald-600 block">{item.time}</span>
+                      <span className="text-[10px] text-slate-400">em {item.inMin} min</span>
                     </div>
                   </div>
-                  
-                  {/* BOTÃO VER NO MAPA */}
-                  <button
-                    type="button"
-                    onClick={handleFocusStop}
-                    className="text-[10px] bg-purple-700 active:bg-purple-900 text-white font-bold px-3 py-1.5 rounded-xl shadow-md transition-all shrink-0 ml-2"
-                  >
-                    Ver no mapa
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2 py-1">
-                  <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-xs text-slate-600 font-medium">Localizando parada de embarque...</p>
-                </div>
-              )}
+                ))}
+              </div>
+
+              {/* BOTÃO PARA SEGUIR ROTA */}
+              <button
+                type="button"
+                onClick={handleStartRouteToStop}
+                className="w-full bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+              >
+                <Navigation2 className="w-4 h-4" />
+                Seguir rota até esta parada (A pé)
+              </button>
             </div>
           ) : (
             <div>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Painel de Mobilidade</span>
-              <h2 className="text-base font-bold text-purple-900">Digite seu destino para buscar rotas</h2>
-              <p className="text-xs text-slate-600 mt-0.5">Busque por ruas, bairros ou locais de Recife e Jaboatão.</p>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Mobilidade Urbana</span>
+              <h2 className="text-base font-bold text-purple-900">Clique em qualquer parada 🚌 no mapa</h2>
+              <p className="text-xs text-slate-600 mt-0.5">Veja os ônibus e horários em tempo real ou pesquise o seu destino acima.</p>
             </div>
           )}
         </div>
@@ -115,9 +116,9 @@ export default function AppHome() {
           <Route className="w-5 h-5" />
           <span className="text-[10px] font-medium">Rotas</span>
         </button>
-        <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
-          <MapPin className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Paradas</span>
+        <button className="flex flex-col items-center gap-1 text-white font-bold">
+          <MapPin className="w-5 h-5 text-emerald-400" />
+          <span className="text-[10px] text-emerald-400">Paradas</span>
         </button>
         <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Bus className="w-5 h-5" />
@@ -129,7 +130,7 @@ export default function AppHome() {
           className="flex flex-col items-center gap-1 text-white bg-purple-700/50 px-2 py-0.5 rounded-lg active:scale-95 transition-transform"
         >
           <Navigation className="w-5 h-5 text-cyan-300" />
-          <span className="text-[10px] font-bold text-cyan-300">Minha localização</span>
+          <span className="text-[10px] font-bold text-cyan-300">GPS</span>
         </button>
       </nav>
 
