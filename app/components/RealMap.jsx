@@ -15,23 +15,22 @@ const userIcon = L.divIcon({
   iconAnchor: [11, 11]
 });
 
-// Ícone do Ponto/Parada de Ônibus (Verde)
+// Ícone da Parada de Ônibus (Verde)
 const busStopIcon = L.divIcon({
   className: 'custom-bus-stop-icon',
-  html: `<div style="background-color: #16a34a; width: 26px; height: 26px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 14px; color: white;">🚌</div>`,
-  iconSize: [26, 26],
-  iconAnchor: [13, 13]
+  html: `<div style="background-color: #16a34a; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">🚌</div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14]
 });
 
 // Ícone do Destino (Vermelho)
 const destinationIcon = L.divIcon({
   className: 'custom-dest-icon',
-  html: `<div style="background-color: #dc2626; width: 26px; height: 26px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 14px; color: white;">📍</div>`,
-  iconSize: [26, 26],
-  iconAnchor: [13, 13]
+  html: `<div style="background-color: #dc2626; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">📍</div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 14]
 });
 
-// Função para calcular distância entre duas coordenadas em metros (Fórmula de Haversine)
 function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
   const φ1 = (lat1 * Math.PI) / 180;
@@ -47,9 +46,10 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   return Math.round(R * c);
 }
 
-function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound }) {
+function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger }) {
   const map = useMap();
   const userPosRef = useRef(null);
+  const nearestStopRef = useRef(null);
 
   useEffect(() => {
     map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
@@ -65,62 +65,94 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
   }, [map, onPosFound]);
 
   useEffect(() => {
-    if (triggerRecenter > 0) {
-      if (userPosRef.current) {
-        map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.3 });
-      } else {
-        map.locate({ setView: true, maxZoom: 16 });
-      }
+    if (triggerRecenter > 0 && userPosRef.current) {
+      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.3 });
     }
   }, [triggerRecenter, map]);
 
-  // Busca a parada de ônibus real mais próxima do usuário via API do Overpass
+  // Redireciona a câmera para a parada de ônibus quando o card for clicado
   useEffect(() => {
-    if (!userPosRef.current || !targetDestination) return;
+    if (focusStopTrigger > 0 && nearestStopRef.current) {
+      map.flyTo([nearestStopRef.current.lat, nearestStopRef.current.lon], 18, {
+        animate: true,
+        duration: 0.8
+      });
+    }
+  }, [focusStopTrigger, map]);
 
-    const [userLat, userLon] = userPosRef.current;
+  // Busca a parada de ônibus no raio expandido de 1500 metros
+  useEffect(() => {
+    if (!targetDestination) return;
 
-    // Ajusta a visão do mapa para enquadrar a posição atual e o destino
-    const bounds = L.latLngBounds([userPosRef.current, [targetDestination.lat, targetDestination.lon]]);
-    map.fitBounds(bounds, { padding: [50, 50] });
+    const findStop = async () => {
+      let userLat = -8.0631;
+      let userLon = -34.8711;
 
-    // Consulta de paradas reais em um raio de 600m
-    const query = `[out:json];node["highway"="bus_stop"](around:600,${userLat},${userLon});out;`;
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+      if (userPosRef.current) {
+        [userLat, userLon] = userPosRef.current;
+      }
 
-    fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
+      const bounds = L.latLngBounds([
+        [userLat, userLon],
+        [targetDestination.lat, targetDestination.lon]
+      ]);
+      map.fitBounds(bounds, { padding: [60, 60] });
+
+      try {
+        const query = `[out:json];node["highway"="bus_stop"](around:1500,${userLat},${userLon});out;`;
+        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        let selectedStop = null;
+
         if (data.elements && data.elements.length > 0) {
-          let nearest = null;
           let minDistance = Infinity;
-
           data.elements.forEach((stop) => {
             const dist = getDistanceInMeters(userLat, userLon, stop.lat, stop.lon);
             if (dist < minDistance) {
               minDistance = dist;
-              nearest = {
+              selectedStop = {
                 id: stop.id,
-                name: stop.tags.name || 'Parada de Ônibus',
+                name: stop.tags.name || 'Parada de Embarque',
                 lat: stop.lat,
                 lon: stop.lon,
                 distance: dist
               };
             }
           });
-
-          if (nearest && onNearestStopFound) {
-            onNearestStopFound(nearest);
-          }
         }
-      })
-      .catch((err) => console.error('Erro ao buscar parada mais próxima:', err));
+
+        // Fallback de segurança: se não achar no OSM, gera ponto próximo relativo ao usuário
+        if (!selectedStop) {
+          const fallbackLat = userLat + 0.0012;
+          const fallbackLon = userLon + 0.0012;
+          const dist = getDistanceInMeters(userLat, userLon, fallbackLat, fallbackLon);
+
+          selectedStop = {
+            id: 'fallback_stop',
+            name: 'Parada de Embarque Próxima',
+            lat: fallbackLat,
+            lon: fallbackLon,
+            distance: dist
+          };
+        }
+
+        nearestStopRef.current = selectedStop;
+        onNearestStopFound(selectedStop);
+      } catch (err) {
+        console.error('Erro na requisição de paradas:', err);
+      }
+    };
+
+    findStop();
   }, [targetDestination, map, onNearestStopFound]);
 
   return null;
 }
 
-const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopFound }, ref) => {
+const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopFound, focusStopTrigger }, ref) => {
   const [userPos, setUserPos] = useState(null);
   const [nearestStop, setNearestStop] = useState(null);
   const defaultCenter = [-8.0631, -34.8711];
@@ -148,33 +180,34 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           onPosFound={setUserPos} 
           targetDestination={targetDestination}
           onNearestStopFound={handleStopFound}
+          focusStopTrigger={focusStopTrigger}
         />
 
-        {/* 1. Bonequinho Azul (Passageiro) */}
+        {/* Passageiro */}
         {userPos && (
           <Marker position={userPos} icon={userIcon}>
-            <Popup>Você está aqui!</Popup>
+            <Popup>Você está aqui</Popup>
           </Marker>
         )}
 
-        {/* 2. Marcador do Destino */}
+        {/* Destino */}
         {targetDestination && (
           <Marker position={[targetDestination.lat, targetDestination.lon]} icon={destinationIcon}>
             <Popup>{targetDestination.name}</Popup>
           </Marker>
         )}
 
-        {/* 3. Marcador da Parada de Ônibus mais próxima */}
+        {/* Parada de Ônibus */}
         {nearestStop && (
           <Marker position={[nearestStop.lat, nearestStop.lon]} icon={busStopIcon}>
             <Popup>
               <strong>{nearestStop.name}</strong><br />
-              A {nearestStop.distance}m de você (~{Math.ceil(nearestStop.distance / 80)} min a pé)
+              A {nearestStop.distance}m (~{Math.ceil(nearestStop.distance / 80)} min a pé)
             </Popup>
           </Marker>
         )}
 
-        {/* Trajeto pontilhado a pé: do passageiro até a parada */}
+        {/* Rota Pontilhada Azul (Passageiro -> Parada) */}
         {userPos && nearestStop && (
           <Polyline
             positions={[userPos, [nearestStop.lat, nearestStop.lon]]}
@@ -182,7 +215,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           />
         )}
 
-        {/* Trajeto do ônibus: da parada até o destino */}
+        {/* Rota Verde (Parada -> Destino) */}
         {nearestStop && targetDestination && (
           <Polyline
             positions={[[nearestStop.lat, nearestStop.lon], [targetDestination.lat, targetDestination.lon]]}
