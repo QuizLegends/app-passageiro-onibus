@@ -3,17 +3,9 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife [lng, lat]
+const defaultCenter = [-34.918, -8.115]; // [lng, lat] Jaboatão / Recife
 
-// Dados simulados de linhas para dar dinamismo imediato ao passageiro
-const mockBusSchedule = [
-  { line: '061 - Piedade', destination: 'TI Tancredo Neves', etaMin: 4 },
-  { line: '062 - Jardim Piedade', destination: 'TI Aeroporto', etaMin: 12 },
-  { line: '910 - Piedade / Rio Doce', destination: 'TI Rio Doce', etaMin: 18 },
-  { line: '044 - Massangana / TI T. Neves', destination: 'TI Tancredo Neves', etaMin: 25 },
-];
-
-// Busca rota a pé no Mapbox Directions API
+// Busca rotas a pé oficiais via Mapbox Directions API
 async function fetchMapboxWalkingRoute(startLon, startLat, endLon, endLat, token) {
   try {
     const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${startLon},${startLat};${endLon},${endLat}?geometries=geojson&access_token=${token}`;
@@ -23,44 +15,51 @@ async function fetchMapboxWalkingRoute(startLon, startLat, endLon, endLat, token
     if (data.routes && data.routes.length > 0) {
       return {
         geometry: data.routes[0].geometry,
-        distance: Math.round(data.routes[0].distance)
+        distance: Math.round(data.routes[0].distance),
+        duration: Math.round(data.routes[0].duration / 60)
       };
     }
   } catch (err) {
-    console.error('Erro na Rota Mapbox:', err);
+    console.error('Erro ao buscar rota no Mapbox:', err);
   }
   return null;
 }
 
-// Busca MÚLTIPLAS paradas de ônibus reais num raio do ponto central via Overpass API
-async function fetchNearbyBusStops(lat, lon) {
+// Busca paradas reais no banco de dados do Mapbox (Tilequery API)
+async function fetchRealStopsFromMapbox(lng, lat, token) {
   try {
-    const query = `[out:json];(node["highway"="bus_stop"](around:1200,${lat},${lon});node["public_transport"="platform"](around:1200,${lat},${lon}););out;`;
-    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    // Busca num raio de 1.5km (1500m) por pontos cadastrados como transporte público
+    const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/${lng},${lat}.json?radius=1500&limit=50&layers=poi_label&access_token=${token}`;
     const res = await fetch(url);
     const data = await res.json();
 
-    if (data.elements && data.elements.length > 0) {
-      return data.elements.map((stop) => ({
-        id: stop.id,
-        name: stop.tags.name || stop.tags['description'] || stop.tags['ref'] || 'Parada de Ônibus',
-        lat: stop.lat,
-        lon: stop.lon
+    if (data && data.features) {
+      // Filtra apenas locais classificados como parada de ônibus / transporte público
+      const busStops = data.features.filter(f => {
+        const type = f.properties.maki || f.properties.type || '';
+        const name = f.properties.name || '';
+        return type.includes('bus') || type.includes('rail') || name.toLowerCase().includes('parada') || name.toLowerCase().includes('estação');
+      });
+
+      return busStops.map(stop => ({
+        id: stop.id || Math.random().toString(),
+        name: stop.properties.name || 'Parada de Ônibus',
+        lon: stop.geometry.coordinates[0],
+        lat: stop.geometry.coordinates[1],
+        address: stop.properties.address || 'Sem endereço cadastrado'
       }));
     }
   } catch (err) {
-    console.error('Erro ao buscar paradas da área:', err);
+    console.error('Erro ao buscar paradas reais via Mapbox:', err);
   }
   return [];
 }
 
-const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, selectedStopForRoute }, ref) => {
+const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRoute }, ref) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
   const stopMarkersRef = useRef([]);
-  const destMarkerRef = useRef(null);
-  const activePopupRef = useRef(null);
 
   const [userPos, setUserPos] = useState(null);
 
@@ -74,68 +73,36 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
     }
   }));
 
-  // Função para renderizar marcadores de paradas no mapa
-  const loadStopsOnMap = async (map, centerLat, centerLon) => {
-    const stops = await fetchNearbyBusStops(centerLat, centerLon);
+  // Função para renderizar as paradas reais no mapa
+  const loadStops = async (map, lng, lat) => {
+    if (!token) return;
 
-    // Limpa marcadores antigos de paradas
+    const stops = await fetchRealStopsFromMapbox(lng, lat, token);
+
+    // Limpa marcadores anteriores
     stopMarkersRef.current.forEach(m => m.remove());
     stopMarkersRef.current = [];
 
     stops.forEach((stop) => {
       const el = document.createElement('div');
-      el.style.cssText = 'background: #16a34a; width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid white; display: flex; align-items: center; justify-content: center; font-size: 14px; color: white; box-shadow: 0 2px 6px rgba(0,0,0,0.35); cursor: pointer; transition: transform 0.2s;';
+      el.style.cssText = 'background: #15803d; width: 32px; height: 32px; border-radius: 50%; border: 2.5px solid #ffffff; display: flex; align-items: center; justify-content: center; font-size: 15px; color: white; box-shadow: 0 3px 8px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.2s;';
       el.innerText = '🚌';
 
-      el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.2)');
-      el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
-
-      // Gerador de horário em tempo real dinâmico
-      const now = new Date();
-      const formatTime = (minutesToAdd) => {
-        const t = new Date(now.getTime() + minutesToAdd * 60000);
-        return t.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      };
-
-      const popupHTML = `
-        <div style="font-family: sans-serif; padding: 4px; max-width: 210px;">
-          <strong style="font-size: 13px; color: #1e293b; display: block; margin-bottom: 4px;">🚏 ${stop.name}</strong>
-          <div style="font-size: 10px; color: #64748b; margin-bottom: 6px; font-weight: bold;">PRÓXIMOS ÔNIBUS:</div>
-          <div style="display: flex; flex-direction: column; gap: 4px;">
-            <div style="display: flex; justify-content: space-between; background: #f1f5f9; padding: 4px 6px; border-radius: 6px; font-size: 11px;">
-              <span><strong>062</strong> - Jr. Piedade</span>
-              <strong style="color: #16a34a;">${formatTime(5)} (${5} min)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; background: #f1f5f9; padding: 4px 6px; border-radius: 6px; font-size: 11px;">
-              <span><strong>061</strong> - Piedade / T. Neves</span>
-              <strong style="color: #2563eb;">${formatTime(14)} (${14} min)</strong>
-            </div>
-            <div style="display: flex; justify-content: space-between; background: #f1f5f9; padding: 4px 6px; border-radius: 6px; font-size: 11px;">
-              <span><strong>910</strong> - Rio Doce</span>
-              <strong style="color: #64748b;">${formatTime(22)} (${22} min)</strong>
-            </div>
-          </div>
+      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+        <div style="font-family: sans-serif; padding: 4px;">
+          <strong style="font-size: 13px; color: #0f172a; display: block;">🚏 ${stop.name}</strong>
+          <span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">${stop.address}</span>
         </div>
-      `;
-
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(popupHTML);
+      `);
 
       const marker = new mapboxgl.Marker(el)
         .setLngLat([stop.lon, stop.lat])
         .setPopup(popup)
         .addTo(map);
 
-      // Evento de clique na parada
       el.addEventListener('click', () => {
         if (onSelectStop) {
-          onSelectStop({
-            ...stop,
-            schedules: [
-              { line: '062 - Jardim Piedade', time: formatTime(5), inMin: 5 },
-              { line: '061 - Piedade / T. Neves', time: formatTime(14), inMin: 14 },
-              { line: '910 - Piedade / Rio Doce', time: formatTime(22), inMin: 22 }
-            ]
-          });
+          onSelectStop(stop);
         }
       });
 
@@ -143,10 +110,8 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
     });
   };
 
-  // 1. Inicialização do Mapa
   useEffect(() => {
-    if (!token) return;
-    if (!mapContainerRef.current || mapRef.current) return;
+    if (!token || mapRef.current || !mapContainerRef.current) return;
 
     mapboxgl.accessToken = token;
 
@@ -161,10 +126,9 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
     mapRef.current = map;
 
     map.on('load', () => {
-      setTimeout(() => {
-        map.resize();
-      }, 200);
+      setTimeout(() => map.resize(), 200);
 
+      // Adiciona a camada para a rota pontilhada
       if (!map.getSource('route-walking')) {
         map.addSource('route-walking', {
           type: 'geojson',
@@ -182,23 +146,22 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
           paint: {
             'line-color': '#2563eb',
             'line-width': 5,
-            'line-opacity': 0.7,
+            'line-opacity': 0.8,
             'line-dasharray': [2, 2]
           }
         });
       }
 
-      // Carrega as paradas da área inicial
-      loadStopsOnMap(map, defaultCenter[1], defaultCenter[0]);
+      loadStops(map, defaultCenter[0], defaultCenter[1]);
     });
 
-    // Atualiza paradas se o usuário arrastar o mapa
+    // Quando o usuário mover o mapa, recarrega as paradas reais daquela área
     map.on('moveend', () => {
       const center = map.getCenter();
-      loadStopsOnMap(map, center.lat, center.lng);
+      loadStops(map, center.lng, center.lat);
     });
 
-    // Captura GPS do Celular
+    // Posição GPS real
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -214,12 +177,12 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
               .addTo(map);
 
             map.flyTo({ center: coords, zoom: 15 });
-            loadStopsOnMap(map, pos.coords.latitude, pos.coords.longitude);
+            loadStops(map, coords[0], coords[1]);
           } else {
             userMarkerRef.current.setLngLat(coords);
           }
         },
-        (err) => console.warn('Aviso de GPS:', err.message),
+        (err) => console.warn('Aviso GPS:', err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
@@ -232,7 +195,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
     };
   }, [token]);
 
-  // 2. Centralizar
+  // Recentralizar
   useEffect(() => {
     if (triggerRecenter > 0 && mapRef.current) {
       const posToUse = userPos || defaultCenter;
@@ -240,14 +203,14 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
     }
   }, [triggerRecenter, userPos]);
 
-  // 3. Traçar Rota para a Parada Selecionada
+  // Rota Real a Pé até a Parada
   useEffect(() => {
     if (!selectedStopForRoute || !mapRef.current || !token) return;
 
     const map = mapRef.current;
     const startCoords = userPos || defaultCenter;
 
-    async function drawRouteToStop() {
+    async function drawRoute() {
       const routeData = await fetchMapboxWalkingRoute(
         startCoords[0], startCoords[1],
         selectedStopForRoute.lon, selectedStopForRoute.lat,
@@ -260,6 +223,10 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
           geometry: routeData.geometry
         });
 
+        if (onSelectStop) {
+          onSelectStop(prev => prev ? { ...prev, walkDistance: routeData.distance, walkTime: routeData.duration } : null);
+        }
+
         const bounds = new mapboxgl.LngLatBounds()
           .extend(startCoords)
           .extend([selectedStopForRoute.lon, selectedStopForRoute.lat]);
@@ -268,7 +235,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onSelectStop, 
       }
     }
 
-    drawRouteToStop();
+    drawRoute();
   }, [selectedStopForRoute, userPos, token]);
 
   return (
