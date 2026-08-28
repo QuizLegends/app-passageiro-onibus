@@ -26,10 +26,12 @@ export default function AppHome() {
 
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
-    setNearestStop(null); // Reseta a parada ao escolher um novo destino
+    setNearestStop(null);
   };
 
-  const handleCardClick = () => {
+  const handleFocusStop = (e) => {
+    // Evita conflitos de evento e dispara o foco na parada
+    if (e) e.stopPropagation();
     if (nearestStop) {
       setFocusStopTrigger((prev) => prev + 1);
     }
@@ -38,7 +40,7 @@ export default function AppHome() {
   return (
     <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-slate-100 font-sans relative overflow-hidden shadow-2xl touch-none">
       
-      {/* CABEÇALHO COM DESTAQUE DE BUSCA */}
+      {/* CABEÇALHO */}
       <header className="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 pt-6 text-white rounded-b-2xl shadow-lg z-20 shrink-0">
         <SearchHeader onSelectDestination={handleSelectDestination} />
       </header>
@@ -52,9 +54,9 @@ export default function AppHome() {
           focusStopTrigger={focusStopTrigger}
         />
 
-        {/* CARD INFERIOR INTERATIVO */}
+        {/* CARD INFERIOR */}
         <div 
-          onClick={handleCardClick}
+          onClick={handleFocusStop}
           className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 cursor-pointer transition-all active:scale-98"
         >
           {selectedDestination ? (
@@ -80,14 +82,20 @@ export default function AppHome() {
                       </span>
                     </div>
                   </div>
-                  <span className="text-[10px] bg-white text-purple-700 font-bold px-2 py-1 rounded-lg border border-purple-200 shrink-0 ml-2">
+                  
+                  {/* BOTÃO VER NO MAPA ATUALIZADO */}
+                  <button
+                    type="button"
+                    onClick={handleFocusStop}
+                    className="text-[10px] bg-purple-700 active:bg-purple-900 text-white font-bold px-3 py-1.5 rounded-xl shadow-md transition-all shrink-0 ml-2"
+                  >
                     Ver no mapa
-                  </span>
+                  </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2 py-1">
                   <div className="w-3 h-3 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-xs text-slate-600 font-medium">Localizando parada de embarque mais próxima...</p>
+                  <p className="text-xs text-slate-600 font-medium">Localizando parada de embarque...</p>
                 </div>
               )}
             </div>
@@ -101,7 +109,7 @@ export default function AppHome() {
         </div>
       </main>
 
-      {/* BARRA INFERIOR DE NAVEGAÇÃO */}
+      {/* NAVEGAÇÃO */}
       <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
         <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Route className="w-5 h-5" />
