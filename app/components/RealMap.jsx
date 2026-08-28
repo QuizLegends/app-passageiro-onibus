@@ -5,28 +5,57 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Cálculo preciso da distância em metros entre dois pontos de GPS (Haversine)
-function getDistanceInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3;
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+// Busca rota real pelas ruas via API OSRM (Gratuita)
+async function fetchRealRoute(startLat, startLon, endLat, endLon, profile = 'foot') {
+  try {
+    const url = `https://router.project-osrm.org/route/v1/${profile}/${startLon},${startLat};${endLon},${endLat}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    const data = await res.json();
 
-  const a =
-    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return Math.round(R * c);
+    if (data.routes && data.routes.length > 0) {
+      // Converte [lon, lat] do GeoJSON para [lat, lon] do Leaflet
+      const coordinates = data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+      const distance = Math.round(data.routes[0].distance);
+      return { coordinates, distance };
+    }
+  } catch (err) {
+    console.error('Erro ao buscar rota real das ruas:', err);
+  }
+  return null;
 }
 
-function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger, nearestStop }) {
+// Busca a parada de ônibus cadastrada mais próxima no OpenStreetMap
+async function fetchNearestRealBusStop(lat, lon) {
+  try {
+    // Procura por paradas de ônibus em um raio de 500m
+    const query = `[out:json];node["highway"="bus_stop"](around:500,${lat},${lon});out;`;
+    const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    if (data.elements && data.elements.length > 0) {
+      const stop = data.elements[0];
+      return {
+        id: stop.id,
+        name: stop.tags.name || 'Parada de Ônibus',
+        lat: stop.lat,
+        lon: stop.lon
+      };
+    }
+  } catch (err) {
+    console.error('Erro ao buscar parada real:', err);
+  }
+
+  // Fallback seguro (retorna ponto próximo na rua se a API falhar)
+  return null;
+}
+
+function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger, nearestStop, setWalkingPath, setBusPath }) {
   const map = useMap();
   const userPosRef = useRef(null);
   const lastDestinationIdRef = useRef(null);
 
-  // Captura a posição do GPS do passageiro apenas para obter o ponto inicial (sem forçar a câmera o tempo todo)
+  // Localização inicial do passageiro
   useEffect(() => {
     map.locate({ enableHighAccuracy: true });
 
@@ -43,66 +72,82 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
     return () => map.off('locationfound', handleLocationFound);
   }, [map, onPosFound]);
 
-  // Recentralizar no Usuário quando clicar no botão da barra inferior
+  // Recentralizar
   useEffect(() => {
     if (triggerRecenter > 0 && userPosRef.current) {
       map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.8 });
     }
   }, [triggerRecenter, map]);
 
-  // ANIMAÇÃO VER NO MAPA: Foca suavemente na Parada de Embarque ao tocar no card/botão
+  // Animação de foco na parada
   useEffect(() => {
     if (focusStopTrigger > 0 && nearestStop) {
-      map.flyTo([nearestStop.lat, nearestStop.lon], 18, {
-        animate: true,
-        duration: 1
-      });
+      map.flyTo([nearestStop.lat, nearestStop.lon], 18, { animate: true, duration: 1 });
     }
   }, [focusStopTrigger, nearestStop, map]);
 
-  // Calcula a parada de embarque e ajusta a visão APENAS quando o destino REALMENTE mudar
+  // Processa o destino: Busca Parada Real e Traça as Rotas pelas Pistas/Calçadas
   useEffect(() => {
     if (!targetDestination) {
       lastDestinationIdRef.current = null;
+      setWalkingPath([]);
+      setBusPath([]);
       return;
     }
 
     const currentDestId = `${targetDestination.lat}-${targetDestination.lon}`;
-    
-    // Evita recalcular e mover a câmera se for o mesmo destino já processado
     if (lastDestinationIdRef.current === currentDestId) return;
-
     lastDestinationIdRef.current = currentDestId;
 
-    let userLat = -8.0631;
-    let userLon = -34.8711;
+    let userLat = userPosRef.current ? userPosRef.current[0] : -8.0631;
+    let userLon = userPosRef.current ? userPosRef.current[1] : -34.8711;
 
-    if (userPosRef.current) {
-      [userLat, userLon] = userPosRef.current;
+    async function processNavigation() {
+      // 1. Busca parada de ônibus real mais próxima da pessoa
+      let realStop = await fetchNearestRealBusStop(userLat, userLon);
+
+      if (!realStop) {
+        // Se não achar via Overpass, coloca a parada 150m a frente no caminho do destino
+        realStop = {
+          id: 'fallback_stop',
+          name: 'Parada Próxima',
+          lat: userLat + (targetDestination.lat - userLat) * 0.05,
+          lon: userLon + (targetDestination.lon - userLon) * 0.05
+        };
+      }
+
+      // 2. Calcula Rota a pé (A pé até a Parada)
+      const walkRoute = await fetchRealRoute(userLat, userLon, realStop.lat, realStop.lon, 'foot');
+      
+      // 3. Calcula Rota do Ônibus (Da Parada até o Destino final)
+      const busRoute = await fetchRealRoute(realStop.lat, realStop.lon, targetDestination.lat, targetDestination.lon, 'driving');
+
+      if (walkRoute) {
+        setWalkingPath(walkRoute.coordinates);
+        realStop.distance = walkRoute.distance;
+      } else {
+        setWalkingPath([[userLat, userLon], [realStop.lat, realStop.lon]]);
+        realStop.distance = 100;
+      }
+
+      if (busRoute) {
+        setBusPath(busRoute.coordinates);
+      } else {
+        setBusPath([[realStop.lat, realStop.lon], [targetDestination.lat, targetDestination.lon]]);
+      }
+
+      onNearestStopFound(realStop);
+
+      // Ajusta enquadramento do mapa
+      const bounds = L.latLngBounds([
+        [userLat, userLon],
+        [targetDestination.lat, targetDestination.lon]
+      ]);
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
 
-    // Ajusta o enquadramento suavemente para mostrar origem e destino
-    const bounds = L.latLngBounds([
-      [userLat, userLon],
-      [targetDestination.lat, targetDestination.lon]
-    ]);
-    map.fitBounds(bounds, { padding: [50, 50] });
-
-    // Ponto de parada calculado na direção do percurso
-    const stopLat = userLat + (targetDestination.lat - userLat) * 0.08;
-    const stopLon = userLon + (targetDestination.lon - userLon) * 0.08;
-    const dist = getDistanceInMeters(userLat, userLon, stopLat, stopLon);
-
-    const calculatedStop = {
-      id: 'nearest_stop_main',
-      name: 'Parada de Embarque Próxima',
-      lat: stopLat,
-      lon: stopLon,
-      distance: dist > 50 ? dist : 120
-    };
-
-    onNearestStopFound(calculatedStop);
-  }, [targetDestination, map, onNearestStopFound]);
+    processNavigation();
+  }, [targetDestination, map, onNearestStopFound, setWalkingPath, setBusPath]);
 
   return null;
 }
@@ -110,10 +155,11 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
 const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopFound, focusStopTrigger }, ref) => {
   const [userPos, setUserPos] = useState(null);
   const [nearestStop, setNearestStop] = useState(null);
+  const [walkingPath, setWalkingPath] = useState([]);
+  const [busPath, setBusPath] = useState([]);
   const [icons, setIcons] = useState(null);
   const defaultCenter = [-8.0631, -34.8711];
 
-  // Callback estável para não disparar re-renders desnecessários
   const handleStopFound = useCallback((stop) => {
     setNearestStop(stop);
     if (onNearestStopFound) onNearestStopFound(stop);
@@ -123,13 +169,12 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
     setUserPos(pos);
   }, []);
 
-  // Cria os ícones do Leaflet ancorados corretamente
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIcons({
         userIcon: L.divIcon({
           className: '',
-          html: `<div style="background-color: #2563eb; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(37,99,235,0.8); position: relative;"></div>`,
+          html: `<div style="background-color: #2563eb; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(37,99,235,0.8);"></div>`,
           iconSize: [20, 20],
           iconAnchor: [10, 10]
         }),
@@ -153,17 +198,9 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
 
   return (
     <div className="w-full h-full relative">
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={14} 
-        zoomControl={false}
-        className="w-full h-full z-0"
-      >
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        
+      <MapContainer center={defaultCenter} zoom={14} zoomControl={false} className="w-full h-full z-0">
+        <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
         <MapController 
           triggerRecenter={triggerRecenter} 
           onPosFound={handlePosFound} 
@@ -171,46 +208,42 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           onNearestStopFound={handleStopFound}
           focusStopTrigger={focusStopTrigger}
           nearestStop={nearestStop}
+          setWalkingPath={setWalkingPath}
+          setBusPath={setBusPath}
         />
 
-        {/* 1. Passageiro (Ponto azul) */}
+        {/* 1. Passageiro */}
         {userPos && (
           <Marker position={userPos} icon={icons.userIcon}>
             <Popup>Você está aqui</Popup>
           </Marker>
         )}
 
-        {/* 2. Destino Selecionado (Pino vermelho) */}
+        {/* 2. Destino */}
         {targetDestination && (
           <Marker position={[targetDestination.lat, targetDestination.lon]} icon={icons.destinationIcon}>
             <Popup>{targetDestination.name}</Popup>
           </Marker>
         )}
 
-        {/* 3. Parada de Embarque (Pino verde) */}
+        {/* 3. Parada de Embarque Real */}
         {nearestStop && (
           <Marker position={[nearestStop.lat, nearestStop.lon]} icon={icons.busStopIcon}>
             <Popup>
               <strong>{nearestStop.name}</strong><br />
-              A {nearestStop.distance}m (~{Math.ceil(nearestStop.distance / 80)} min a pé)
+              A {nearestStop.distance}m da sua posição
             </Popup>
           </Marker>
         )}
 
-        {/* Linha pontilhada azul (Passageiro -> Parada) */}
-        {userPos && nearestStop && (
-          <Polyline
-            positions={[userPos, [nearestStop.lat, nearestStop.lon]]}
-            pathOptions={{ color: '#2563eb', dashArray: '6, 8', weight: 4 }}
-          />
+        {/* ROTA A PÉ (Curvando as esquinas da calçada em azul) */}
+        {walkingPath.length > 0 && (
+          <Polyline positions={walkingPath} pathOptions={{ color: '#2563eb', dashArray: '6, 8', weight: 5 }} />
         )}
 
-        {/* Linha verde contínua (Parada -> Destino) */}
-        {nearestStop && targetDestination && (
-          <Polyline
-            positions={[[nearestStop.lat, nearestStop.lon], [targetDestination.lat, targetDestination.lon]]}
-            pathOptions={{ color: '#16a34a', weight: 4 }}
-          />
+        {/* ROTA DO ÔNIBUS (Curvando as pistas e avenidas em verde) */}
+        {busPath.length > 0 && (
+          <Polyline positions={busPath} pathOptions={{ color: '#16a34a', weight: 5 }} />
         )}
       </MapContainer>
     </div>
