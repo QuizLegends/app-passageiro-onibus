@@ -5,32 +5,6 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Ícone do Usuário / Passageiro (Bolinha Azul com pulso)
-const userIcon = L.divIcon({
-  className: 'custom-user-icon',
-  html: `<div style="background-color: #2563eb; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.9); position: relative;">
-          <div style="position: absolute; top: -5px; left: -5px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #2563eb; animation: ping 1.5s infinite; opacity: 0.7;"></div>
-         </div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 11]
-});
-
-// Ícone da Parada de Ônibus (Verde)
-const busStopIcon = L.divIcon({
-  className: 'custom-bus-stop-icon',
-  html: `<div style="background-color: #16a34a; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">🚌</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
-
-// Ícone do Destino (Vermelho)
-const destinationIcon = L.divIcon({
-  className: 'custom-dest-icon',
-  html: `<div style="background-color: #dc2626; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">📍</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
-
 // Cálculo preciso da distância em metros entre dois pontos de GPS (Haversine)
 function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
@@ -124,12 +98,43 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
 const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopFound, focusStopTrigger }, ref) => {
   const [userPos, setUserPos] = useState(null);
   const [nearestStop, setNearestStop] = useState(null);
+  const [icons, setIcons] = useState(null);
   const defaultCenter = [-8.0631, -34.8711];
+
+  // Cria os ícones do Leaflet somente no client-side (navegador)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIcons({
+        userIcon: L.divIcon({
+          className: 'custom-user-icon',
+          html: `<div style="background-color: #2563eb; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.9); position: relative;">
+                  <div style="position: absolute; top: -5px; left: -5px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #2563eb; animation: ping 1.5s infinite; opacity: 0.7;"></div>
+                 </div>`,
+          iconSize: [22, 22],
+          iconAnchor: [11, 11]
+        }),
+        busStopIcon: L.divIcon({
+          className: 'custom-bus-stop-icon',
+          html: `<div style="background-color: #16a34a; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">🚌</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        }),
+        destinationIcon: L.divIcon({
+          className: 'custom-dest-icon',
+          html: `<div style="background-color: #dc2626; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">📍</div>`,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
+        })
+      });
+    }
+  }, []);
 
   const handleStopFound = (stop) => {
     setNearestStop(stop);
     if (onNearestStopFound) onNearestStopFound(stop);
   };
+
+  if (!icons) return null;
 
   return (
     <div className="w-full h-full relative">
@@ -154,21 +159,21 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
 
         {/* 1. Passageiro (Bolinha azul) */}
         {userPos && (
-          <Marker position={userPos} icon={userIcon}>
+          <Marker position={userPos} icon={icons.userIcon}>
             <Popup>Você está aqui</Popup>
           </Marker>
         )}
 
         {/* 2. Destino Selecionado (Pino vermelho) */}
         {targetDestination && (
-          <Marker position={[targetDestination.lat, targetDestination.lon]} icon={destinationIcon}>
+          <Marker position={[targetDestination.lat, targetDestination.lon]} icon={icons.destinationIcon}>
             <Popup>{targetDestination.name}</Popup>
           </Marker>
         )}
 
         {/* 3. Parada de Embarque (Pino verde de ônibus) */}
         {nearestStop && (
-          <Marker position={[nearestStop.lat, nearestStop.lon]} icon={busStopIcon}>
+          <Marker position={[nearestStop.lat, nearestStop.lon]} icon={icons.busStopIcon}>
             <Popup>
               <strong>{nearestStop.name}</strong><br />
               A {nearestStop.distance}m (~{Math.ceil(nearestStop.distance / 80)} min a pé)
