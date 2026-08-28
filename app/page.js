@@ -1,11 +1,15 @@
 'use client';
 
+// Desativa a pré-renderização estática (SSR) para evitar erro de 'window is not defined' no Leaflet na Vercel
+export const dynamic = 'force-dynamic';
+
 import React, { useState } from 'react';
-import dynamic from 'next/dynamic';
+import dynamicNext from 'next/dynamic';
 import SearchHeader from './components/SearchHeader';
 import { MapPin, Navigation, Bus, Route, Footprints, ChevronRight } from 'lucide-react';
 
-const RealMap = dynamic(() => import('./components/RealMap'), {
+// Carregamento dinâmico sem Server-Side Rendering (ssr: false)
+const RealMap = dynamicNext(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
@@ -30,7 +34,6 @@ export default function AppHome() {
   };
 
   const handleFocusStop = (e) => {
-    // Evita conflitos de evento e dispara o foco na parada
     if (e) e.stopPropagation();
     if (nearestStop) {
       setFocusStopTrigger((prev) => prev + 1);
@@ -83,7 +86,6 @@ export default function AppHome() {
                     </div>
                   </div>
                   
-                  {/* BOTÃO VER NO MAPA ATUALIZADO */}
                   <button
                     type="button"
                     onClick={handleFocusStop}
@@ -109,7 +111,7 @@ export default function AppHome() {
         </div>
       </main>
 
-      {/* NAVEGAÇÃO */}
+      {/* BARRA DE NAVEGAÇÃO INFERIOR */}
       <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
         <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Route className="w-5 h-5" />
