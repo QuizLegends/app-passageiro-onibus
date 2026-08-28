@@ -1,109 +1,119 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Search, MapPin, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, MapPin, Bus, Loader2, X } from 'lucide-react';
 
-export default function SearchHeader({ onSelectDestination }) {
+export default function SearchHeader({ onSelectDestination, onSelectBusLine }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const searchRef = useRef(null);
 
-  // Exemplo de locais populares em Recife e Jaboatão dos Guararapes para busca rápida
-  const defaultLocations = [
-    { name: 'Marco Zero, Recife Antigo', lat: -8.0631, lon: -34.8711 },
-    { name: 'Shopping Recife, Boa Viagem', lat: -8.1192, lon: -34.9048 },
-    { name: 'Shopping Guararapes, Piedade (Jaboatão)', lat: -8.1672, lon: -35.0003 },
-    { name: 'Estação Central do Recife (Metrô)', lat: -8.0668, lon: -34.8837 },
-    { name: 'TI Joana Bezerra', lat: -8.0706, lon: -34.8953 },
-    { name: 'TI Jaboatão', lat: -8.1118, lon: -35.0152 }
-  ];
+  // Fecha a lista de resultados ao clicar fora do campo de busca
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleSearch = (text) => {
-    setQuery(text);
-
-    if (text.trim().length < 2) {
+  // Faz a busca em tempo real com debounce (aguarda 400ms após parar de digitar)
+  useEffect(() => {
+    if (query.trim().length < 3) {
       setResults([]);
+      setIsOpen(false);
       return;
     }
 
-    setIsLoading(true);
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      setIsOpen(true);
+      try {
+        // Busca de endereços reais focada na RMR via OpenStreetMap Nominatim
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+            query
+          )}&viewbox=-35.15,-7.90,-34.75,-8.25&bounded=1&limit=5&countrycodes=br`
+        );
+        const data = await response.json();
 
-    // Filtra localmente os locais correspondentes ao texto digitado
-    const filtered = defaultLocations.filter((item) =>
-      item.name.toLowerCase().includes(text.toLowerCase())
-    );
+        const formattedResults = data.map((item) => ({
+          id: item.place_id,
+          title: item.display_name.split(',')[0],
+          subtitle: item.display_name.split(',').slice(1, 3).join(','),
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+          type: 'location'
+        }));
 
-    setResults(filtered);
-    setIsLoading(false);
-  };
+        setResults(formattedResults);
+      } catch (err) {
+        console.error('Erro ao buscar dados reais:', err);
+      } finally {
+        setLoading(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const handleSelect = (item) => {
-    setQuery(item.name);
-    setResults([]);
-    if (onSelectDestination) {
-      onSelectDestination(item);
-    }
-  };
-
-  const handleClear = () => {
-    setQuery('');
-    setResults([]);
-    if (onSelectDestination) {
-      onSelectDestination(null);
+    setQuery(item.title);
+    setIsOpen(false);
+    if (item.type === 'location' && onSelectDestination) {
+      onSelectDestination({
+        name: item.title,
+        lat: item.lat,
+        lon: item.lon
+      });
     }
   };
 
   return (
-    <div className="relative w-full">
-      {/* Campo de Busca */}
-      <div className="relative flex items-center">
-        <Search className="absolute left-3 w-5 h-5 text-purple-300 pointer-events-none" />
+    <div ref={searchRef} className="relative w-full z-30">
+      <div className="flex items-center bg-white/15 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 shadow-inner">
+        <Search className="w-5 h-5 text-purple-200 shrink-0 mr-2" />
         
-        <input
-          type="text"
+        <input 
+          type="text" 
           value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Para onde você vai hoje?"
-          className="w-full bg-purple-950/60 text-white placeholder-purple-300 text-sm font-medium rounded-2xl pl-10 pr-10 py-3 outline-none border border-purple-700/50 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all shadow-inner"
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => query.length >= 3 && setIsOpen(true)}
+          placeholder="Para onde você quer ir ou qual linha buscar?" 
+          className="bg-transparent w-full text-sm text-white placeholder-purple-200 focus:outline-none"
         />
 
-        {query && (
-          <button
-            type="button"
-            onClick={handleClear}
-            className="absolute right-3 text-purple-300 hover:text-white p-1 rounded-full transition-colors"
-          >
-            <X className="w-4 h-4" />
+        {loading && <Loader2 className="w-4 h-4 text-purple-200 animate-spin shrink-0 ml-2" />}
+        
+        {query && !loading && (
+          <button onClick={() => { setQuery(''); setResults([]); setIsOpen(false); }}>
+            <X className="w-4 h-4 text-purple-200 shrink-0 ml-2" />
           </button>
         )}
       </div>
 
-      {/* Lista Suspensa de Sugestões / Resultados */}
-      {results.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-          <ul className="max-h-60 overflow-y-auto divide-y divide-slate-100">
-            {results.map((item, index) => (
-              <li key={index}>
-                <button
-                  type="button"
-                  onClick={() => handleSelect(item)}
-                  className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-purple-50 active:bg-purple-100 transition-colors"
-                >
-                  <div className="p-2 bg-purple-100 text-purple-700 rounded-xl shrink-0">
-                    <MapPin className="w-4 h-4" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-xs font-semibold text-slate-800 truncate">
-                      {item.name}
-                    </span>
-                    <span className="text-[10px] text-slate-500">
-                      Pernambuco
-                    </span>
-                  </div>
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* RESULTADOS REAIS DA BUSCA */}
+      {isOpen && results.length > 0 && (
+        <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-72 overflow-y-auto z-50">
+          {results.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => handleSelect(item)}
+              className="flex items-center gap-3 p-3 hover:bg-purple-50 cursor-pointer border-b border-slate-100 last:border-none transition-colors"
+            >
+              <div className="p-2 bg-purple-100 text-purple-800 rounded-full shrink-0">
+                {item.type === 'location' ? <MapPin className="w-4 h-4" /> : <Bus className="w-4 h-4" />}
+              </div>
+              <div className="flex flex-col min-w-0">
+                <span className="text-sm font-bold text-slate-800 truncate">{item.title}</span>
+                <span className="text-xs text-slate-500 truncate">{item.subtitle}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>
