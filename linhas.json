@@ -1,0 +1,3122 @@
+[
+  {
+    "id": "001",
+    "code": "001",
+    "name": "Ponte Dos Carvalhos / Prazeres (Barra De Jangada)",
+    "agency": "CTC",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=001"
+  },
+  {
+    "id": "010",
+    "code": "010",
+    "name": "Abdo Cabus (Conde Boa Vista)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=010"
+  },
+  {
+    "id": "011",
+    "code": "011",
+    "name": "Piedade / Derby",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=011"
+  },
+  {
+    "id": "013",
+    "code": "013",
+    "name": "Jardim Beira Rio (Pina)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=013"
+  },
+  {
+    "id": "014",
+    "code": "014",
+    "name": "Brasília (Cd. Boa Vista)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=014"
+  },
+  {
+    "id": "018",
+    "code": "018",
+    "name": "Brasília Teimosa",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=018"
+  },
+  {
+    "id": "020",
+    "code": "020",
+    "name": "Candeias / Ti Tancredo Neves",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=020"
+  },
+  {
+    "id": "021",
+    "code": "021",
+    "name": "Ti Joana Bezerra / Shopping Riomar",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=021"
+  },
+  {
+    "id": "023",
+    "code": "023",
+    "name": "Ti Tancredo Neves / Ti Aeroporto",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=023"
+  },
+  {
+    "id": "024",
+    "code": "024",
+    "name": "Ti Tancredo Neves (Circular Boa Viagem)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=024"
+  },
+  {
+    "id": "026",
+    "code": "026",
+    "name": "Ti Aeroporto / Ti Joana Bezerra",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=026"
+  },
+  {
+    "id": "030",
+    "code": "030",
+    "name": "Ti Rio Doce / Barra De Jangada",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=030"
+  },
+  {
+    "id": "031",
+    "code": "031",
+    "name": "Shopping Center (Ter. Res. Boa Viagem)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=031"
+  },
+  {
+    "id": "032",
+    "code": "032",
+    "name": "Setúbal (Conde Da Boa Vista)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=032"
+  },
+  {
+    "id": "034",
+    "code": "034",
+    "name": "Curcurana / Ti Cajueiro Seco",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=034"
+  },
+  {
+    "id": "036",
+    "code": "036",
+    "name": "Aeroporto (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=036"
+  },
+  {
+    "id": "037",
+    "code": "037",
+    "name": "Comportas / Ti Cajueiro Seco",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=037"
+  },
+  {
+    "id": "038",
+    "code": "038",
+    "name": "Residencial Boa Viagem (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=038"
+  },
+  {
+    "id": "039",
+    "code": "039",
+    "name": "Setúbal (Príncipe)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=039"
+  },
+  {
+    "id": "041",
+    "code": "041",
+    "name": "Setúbal (Opcional)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=041"
+  },
+  {
+    "id": "043",
+    "code": "043",
+    "name": "Aeroporto / Tacaruna (Derby)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=043"
+  },
+  {
+    "id": "044",
+    "code": "044",
+    "name": "Massangana (Boa Vista)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=044"
+  },
+  {
+    "id": "049",
+    "code": "049",
+    "name": "Ti Tip / Moreno (Br-232)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=049"
+  },
+  {
+    "id": "050",
+    "code": "050",
+    "name": "Ti Pe-15 / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=050"
+  },
+  {
+    "id": "061",
+    "code": "061",
+    "name": "Piedade",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=061"
+  },
+  {
+    "id": "062",
+    "code": "062",
+    "name": "Jardim Piedade",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=062"
+  },
+  {
+    "id": "063",
+    "code": "063",
+    "name": "Jardim Piedade (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=063"
+  },
+  {
+    "id": "064",
+    "code": "064",
+    "name": "Piedade (Opcional)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=064"
+  },
+  {
+    "id": "065",
+    "code": "065",
+    "name": "Piedade / Ti Prazeres",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=065"
+  },
+  {
+    "id": "069",
+    "code": "069",
+    "name": "Conj. Catamarã",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=069"
+  },
+  {
+    "id": "070",
+    "code": "070",
+    "name": "Candeias / Shopping Riomar",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=070"
+  },
+  {
+    "id": "071",
+    "code": "071",
+    "name": "Candeias",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=071"
+  },
+  {
+    "id": "072",
+    "code": "072",
+    "name": "Candeias (Opcional)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=072"
+  },
+  {
+    "id": "073",
+    "code": "073",
+    "name": "Candeias (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=073"
+  },
+  {
+    "id": "075",
+    "code": "075",
+    "name": "Ti Prazeres / Curcurana",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=075"
+  },
+  {
+    "id": "080",
+    "code": "080",
+    "name": "Ti Joana Bezerra / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=080"
+  },
+  {
+    "id": "101",
+    "code": "101",
+    "name": "Ti Recife / Ti J. Bezerra (Boa Vista)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=101"
+  },
+  {
+    "id": "102",
+    "code": "102",
+    "name": "Ti Santa Luzia / Ibura",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=102"
+  },
+  {
+    "id": "103",
+    "code": "103",
+    "name": "Ur-11 / Ti Barro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=103"
+  },
+  {
+    "id": "104",
+    "code": "104",
+    "name": "Ti J. Bezerra / Ti Recife (Imip)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=104"
+  },
+  {
+    "id": "106",
+    "code": "106",
+    "name": "Ti Santa Luzia / Parque Aeronáutica (Jiquiá)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=106"
+  },
+  {
+    "id": "1062",
+    "code": "1062",
+    "name": "Ti Abreu E Lima (Pcr) (Parador)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1062"
+  },
+  {
+    "id": "107",
+    "code": "107",
+    "name": "Ti Recife (Cabugá/Pcr)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=107"
+  },
+  {
+    "id": "1076",
+    "code": "1076",
+    "name": "Ti Pelópidas (Pcr) (Parador)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1076"
+  },
+  {
+    "id": "108",
+    "code": "108",
+    "name": "Ti Barro / Ceasa",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=108"
+  },
+  {
+    "id": "110",
+    "code": "110",
+    "name": "Ibura / Ti Prazeres",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=110"
+  },
+  {
+    "id": "1100",
+    "code": "1100",
+    "name": "Ti Pe-15 (Pcr) (Parador)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1100"
+  },
+  {
+    "id": "115",
+    "code": "115",
+    "name": "Ti Aeroporto / Ti Afogados",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=115"
+  },
+  {
+    "id": "116",
+    "code": "116",
+    "name": "Ti Recife (Príncipe)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=116"
+  },
+  {
+    "id": "117",
+    "code": "117",
+    "name": "Ti Recife (Pcr/Cabugá)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=117"
+  },
+  {
+    "id": "118",
+    "code": "118",
+    "name": "Prazeres / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=118"
+  },
+  {
+    "id": "120",
+    "code": "120",
+    "name": "Alto Dois Carneiros / Shopping Recife",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=120"
+  },
+  {
+    "id": "121",
+    "code": "121",
+    "name": "Vila Da Sudene",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=121"
+  },
+  {
+    "id": "122",
+    "code": "122",
+    "name": "Vila Do Ipsep",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=122"
+  },
+  {
+    "id": "125",
+    "code": "125",
+    "name": "Córrego Da Gameleira (Vila Do Sesi) / Ti Tancredo Neves",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=125"
+  },
+  {
+    "id": "126",
+    "code": "126",
+    "name": "Ti Tancredo Neves / Ur-03",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=126"
+  },
+  {
+    "id": "128",
+    "code": "128",
+    "name": "Ti Barro / Ur-03 (Milagres)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=128"
+  },
+  {
+    "id": "129",
+    "code": "129",
+    "name": "Paiva / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=129"
+  },
+  {
+    "id": "131",
+    "code": "131",
+    "name": "Ur-02 (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=131"
+  },
+  {
+    "id": "132",
+    "code": "132",
+    "name": "Ti Tancredo Neves / Ur-02 (Ibura)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=132"
+  },
+  {
+    "id": "134",
+    "code": "134",
+    "name": "Lagoa Encantada / Ti Tancredo Neves",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=134"
+  },
+  {
+    "id": "135",
+    "code": "135",
+    "name": "Ur-10 / Ti Tancredo Neves",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=135"
+  },
+  {
+    "id": "136",
+    "code": "136",
+    "name": "Ti Tancredo Neves / Ur-05",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=136"
+  },
+  {
+    "id": "138",
+    "code": "138",
+    "name": "Ti Tancredo Neves / Zumbi Do Pacheco",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=138"
+  },
+  {
+    "id": "139",
+    "code": "139",
+    "name": "Ti Cabo / Ti Cajueiro Seco",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=139"
+  },
+  {
+    "id": "140",
+    "code": "140",
+    "name": "Ti Cajueiro Seco / Shopping Recife",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=140"
+  },
+  {
+    "id": "141",
+    "code": "141",
+    "name": "Jardim Monte Verde / Ti Tancredo Neves",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=141"
+  },
+  {
+    "id": "142",
+    "code": "142",
+    "name": "Ti Tancredo Neves / Alto Dois Carneiros",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=142"
+  },
+  {
+    "id": "143",
+    "code": "143",
+    "name": "Ti Tancredo Neves / Ur-06",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=143"
+  },
+  {
+    "id": "144",
+    "code": "144",
+    "name": "Ur-04 / Ti Tancredo Neves",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=144"
+  },
+  {
+    "id": "145",
+    "code": "145",
+    "name": "Alto Dois Carneiros (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=145"
+  },
+  {
+    "id": "146",
+    "code": "146",
+    "name": "Ur-11 (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=146"
+  },
+  {
+    "id": "149",
+    "code": "149",
+    "name": "Ti Cavaleiro / Zumbi Do Pacheco",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=149"
+  },
+  {
+    "id": "151",
+    "code": "151",
+    "name": "Jardim Jordão / Ti Aeroporto",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=151"
+  },
+  {
+    "id": "152",
+    "code": "152",
+    "name": "Jordão Baixo / Ti Aeroporto",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=152"
+  },
+  {
+    "id": "153",
+    "code": "153",
+    "name": "Jordão Alto / Ti Aeroporto",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=153"
+  },
+  {
+    "id": "154",
+    "code": "154",
+    "name": "Jordão (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=154"
+  },
+  {
+    "id": "155",
+    "code": "155",
+    "name": "Jordão Baixo / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=155"
+  },
+  {
+    "id": "157",
+    "code": "157",
+    "name": "Gaibu / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=157"
+  },
+  {
+    "id": "158",
+    "code": "158",
+    "name": "Garapu / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=158"
+  },
+  {
+    "id": "159",
+    "code": "159",
+    "name": "Charneca / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=159"
+  },
+  {
+    "id": "160",
+    "code": "160",
+    "name": "Gaibu / Barra De Jangada - Via Paiva (Opcional)",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=160"
+  },
+  {
+    "id": "162",
+    "code": "162",
+    "name": "Muribeca / Ti Cajueiro Seco",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=162"
+  },
+  {
+    "id": "163",
+    "code": "163",
+    "name": "Ti Cajueiro Seco (Circular)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=163"
+  },
+  {
+    "id": "164",
+    "code": "164",
+    "name": "Marcos Freire / Ti Cajueiro Seco",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=164"
+  },
+  {
+    "id": "165",
+    "code": "165",
+    "name": "Muribeca Dos Guararapes / Ti Cajueiro Seco",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=165"
+  },
+  {
+    "id": "166",
+    "code": "166",
+    "name": "Ti Cajueiro Seco (Rua Do Sol)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=166"
+  },
+  {
+    "id": "167",
+    "code": "167",
+    "name": "Ti Tancredo Neves (Imip)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=167"
+  },
+  {
+    "id": "168",
+    "code": "168",
+    "name": "Ti Tancredo Neves (Cde. B. Vista)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=168"
+  },
+  {
+    "id": "170",
+    "code": "170",
+    "name": "Muribeca Dos Guararapes (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=170"
+  },
+  {
+    "id": "171",
+    "code": "171",
+    "name": "Lot. Integração / Ti Cajueiro Seco",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=171"
+  },
+  {
+    "id": "172",
+    "code": "172",
+    "name": "Marcos Freire (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=172"
+  },
+  {
+    "id": "178",
+    "code": "178",
+    "name": "Porto De Suape / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=178"
+  },
+  {
+    "id": "181",
+    "code": "181",
+    "name": "Cabo (Cohab) / Ti Cajueiro Seco",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=181"
+  },
+  {
+    "id": "183",
+    "code": "183",
+    "name": "Pte. Dos Carvalhos / Ti Cajueiro Seco",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=183"
+  },
+  {
+    "id": "184",
+    "code": "184",
+    "name": "Cabo (Bacurau)",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=184"
+  },
+  {
+    "id": "185",
+    "code": "185",
+    "name": "Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=185"
+  },
+  {
+    "id": "1902",
+    "code": "1902",
+    "name": "Ti Abreu E Lima / Mirueira",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1902"
+  },
+  {
+    "id": "1903",
+    "code": "1903",
+    "name": "Araçoiaba / Ti Igarassu",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1903"
+  },
+  {
+    "id": "1904",
+    "code": "1904",
+    "name": "Ti Igarassu / Nova Cruz",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1904"
+  },
+  {
+    "id": "1905",
+    "code": "1905",
+    "name": "Ti Igarassu / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1905"
+  },
+  {
+    "id": "1906",
+    "code": "1906",
+    "name": "Ti Pelópidas / Ti Macaxeira",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1906"
+  },
+  {
+    "id": "1907",
+    "code": "1907",
+    "name": "Paulista / Rio Doce",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1907"
+  },
+  {
+    "id": "1908",
+    "code": "1908",
+    "name": "Ti Igarassu / Botafogo",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1908"
+  },
+  {
+    "id": "1909",
+    "code": "1909",
+    "name": "Ti Pelópidas / Ti Joana Bezerra",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1909"
+  },
+  {
+    "id": "191",
+    "code": "191",
+    "name": "Recife / Porto De Galinhas (N. Sra. Do Ó)",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=191"
+  },
+  {
+    "id": "1911",
+    "code": "1911",
+    "name": "Ouro Preto (Cohab)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1911"
+  },
+  {
+    "id": "1912",
+    "code": "1912",
+    "name": "Caetés I / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1912"
+  },
+  {
+    "id": "1913",
+    "code": "1913",
+    "name": "Ti Pe-15 / Ti Joana Bezerra",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1913"
+  },
+  {
+    "id": "1917",
+    "code": "1917",
+    "name": "Caetés Ii / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1917"
+  },
+  {
+    "id": "1918",
+    "code": "1918",
+    "name": "Ti Igarassu (Circular)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1918"
+  },
+  {
+    "id": "1921",
+    "code": "1921",
+    "name": "Ouro Preto / Ti Pe-15",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1921"
+  },
+  {
+    "id": "1922",
+    "code": "1922",
+    "name": "Pau Amarelo / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1922"
+  },
+  {
+    "id": "1923",
+    "code": "1923",
+    "name": "Cidade Tabajara / Ti Pe-15",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1923"
+  },
+  {
+    "id": "1926",
+    "code": "1926",
+    "name": "Ouro Preto (Jatobá Ii)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1926"
+  },
+  {
+    "id": "1927",
+    "code": "1927",
+    "name": "Ouro Preto (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1927"
+  },
+  {
+    "id": "1928",
+    "code": "1928",
+    "name": "Maranguape Ii (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1928"
+  },
+  {
+    "id": "1929",
+    "code": "1929",
+    "name": "Alameda Paulista / Ti Rio Doce (Jaguarana)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1929"
+  },
+  {
+    "id": "1931",
+    "code": "1931",
+    "name": "Jardim Paulista Baixo / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1931"
+  },
+  {
+    "id": "1932",
+    "code": "1932",
+    "name": "Jardim Paulista Alto / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1932"
+  },
+  {
+    "id": "1933",
+    "code": "1933",
+    "name": "Ti Pe-15 / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1933"
+  },
+  {
+    "id": "1934",
+    "code": "1934",
+    "name": "Arthur Lundgren I / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1934"
+  },
+  {
+    "id": "1935",
+    "code": "1935",
+    "name": "Paratibe / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1935"
+  },
+  {
+    "id": "1936",
+    "code": "1936",
+    "name": "Mirueira (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1936"
+  },
+  {
+    "id": "1937",
+    "code": "1937",
+    "name": "Ti Abreu E Lima / Nova Aurora",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1937"
+  },
+  {
+    "id": "1940",
+    "code": "1940",
+    "name": "Ti Pe-15 (Circular)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1940"
+  },
+  {
+    "id": "1941",
+    "code": "1941",
+    "name": "Arthur Lundgren Ii / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1941"
+  },
+  {
+    "id": "1943",
+    "code": "1943",
+    "name": "Mirueira / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1943"
+  },
+  {
+    "id": "1944",
+    "code": "1944",
+    "name": "Lot. Conceição / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1944"
+  },
+  {
+    "id": "1945",
+    "code": "1945",
+    "name": "Jaguarana (Alameda) / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1945"
+  },
+  {
+    "id": "1946",
+    "code": "1946",
+    "name": "Ti Igarassu (Br-101)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1946"
+  },
+  {
+    "id": "1948",
+    "code": "1948",
+    "name": "Ti Abreu E Lima / Arthur Lundgren Ii",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1948"
+  },
+  {
+    "id": "1949",
+    "code": "1949",
+    "name": "Ti Abreu E Lima (Circular Paulista)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1949"
+  },
+  {
+    "id": "195",
+    "code": "195",
+    "name": "Recife / Porto De Galinhas (Opcional)",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=195"
+  },
+  {
+    "id": "1950",
+    "code": "1950",
+    "name": "Engenho Maranguape / Varadouro",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1950"
+  },
+  {
+    "id": "1952",
+    "code": "1952",
+    "name": "Ti Pelópidas / Ti Rio Doce",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1952"
+  },
+  {
+    "id": "1953",
+    "code": "1953",
+    "name": "Maranguape Ii / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1953"
+  },
+  {
+    "id": "1955",
+    "code": "1955",
+    "name": "Ti Pelópidas / Cj. Praia Do Janga (Eng. Maranguape)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1955"
+  },
+  {
+    "id": "1956",
+    "code": "1956",
+    "name": "Igarassu (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1956"
+  },
+  {
+    "id": "1957",
+    "code": "1957",
+    "name": "Caetés I (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1957"
+  },
+  {
+    "id": "1958",
+    "code": "1958",
+    "name": "Costa Azul / Ti Pelópidas",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1958"
+  },
+  {
+    "id": "196",
+    "code": "196",
+    "name": "Ti Cabo / P. De Galinhas (N. Sra. Do Ó)",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=196"
+  },
+  {
+    "id": "1960",
+    "code": "1960",
+    "name": "Ti Rio Doce / Maria Farinha (Casa Caiada)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1960"
+  },
+  {
+    "id": "1963",
+    "code": "1963",
+    "name": "Ti Pe-15 / Ti Igarassu (Sítio Histórico)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1963"
+  },
+  {
+    "id": "1964",
+    "code": "1964",
+    "name": "Ti Igarassu / Ti Macaxeira",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1964"
+  },
+  {
+    "id": "1966",
+    "code": "1966",
+    "name": "Ti Rio Doce / Ti Pe-15 (Fragoso)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1966"
+  },
+  {
+    "id": "1967",
+    "code": "1967",
+    "name": "Ti Igarassu (Sítio Histórico)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1967"
+  },
+  {
+    "id": "1968",
+    "code": "1968",
+    "name": "Ilha De Itamaracá / Ti Igarassu",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1968"
+  },
+  {
+    "id": "1969",
+    "code": "1969",
+    "name": "Itapissuma / Ti Igarassu",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1969"
+  },
+  {
+    "id": "1971",
+    "code": "1971",
+    "name": "Amparo",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1971"
+  },
+  {
+    "id": "1973",
+    "code": "1973",
+    "name": "Casa Caiada (Conde Boa Vista)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1973"
+  },
+  {
+    "id": "1974",
+    "code": "1974",
+    "name": "Jardim Atlântico",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1974"
+  },
+  {
+    "id": "1975",
+    "code": "1975",
+    "name": "Amparo (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1975"
+  },
+  {
+    "id": "1977",
+    "code": "1977",
+    "name": "Ti Pelópidas (Conde Boa Vista)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1977"
+  },
+  {
+    "id": "1978",
+    "code": "1978",
+    "name": "Loteamento Conceição / Ti Rio Doce (Pe-22)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1978"
+  },
+  {
+    "id": "198",
+    "code": "198",
+    "name": "Ipojuca / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=198"
+  },
+  {
+    "id": "1980",
+    "code": "1980",
+    "name": "Igarassu / Cidade Tabajara",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1980"
+  },
+  {
+    "id": "1981",
+    "code": "1981",
+    "name": "Ti Rio Doce / Ti Joana Bezerra",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1981"
+  },
+  {
+    "id": "1982",
+    "code": "1982",
+    "name": "Conjunto Beira Mar / Derby",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1982"
+  },
+  {
+    "id": "1983",
+    "code": "1983",
+    "name": "Ti Rio Doce (Princesa Isabel)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1983"
+  },
+  {
+    "id": "1984",
+    "code": "1984",
+    "name": "Lot. Bonfim / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1984"
+  },
+  {
+    "id": "1985",
+    "code": "1985",
+    "name": "Rio Doce (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1985"
+  },
+  {
+    "id": "1986",
+    "code": "1986",
+    "name": "Ti Pe-15 / Ti Rio Doce",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1986"
+  },
+  {
+    "id": "1987",
+    "code": "1987",
+    "name": "Ti Rio Doce (Príncipe / Conde Boa Vista)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1987"
+  },
+  {
+    "id": "1988",
+    "code": "1988",
+    "name": "Desterro / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1988"
+  },
+  {
+    "id": "1989",
+    "code": "1989",
+    "name": "Lot. Planalto / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1989"
+  },
+  {
+    "id": "199",
+    "code": "199",
+    "name": "Camela / Ti Cabo",
+    "agency": "SJT",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=199"
+  },
+  {
+    "id": "1992",
+    "code": "1992",
+    "name": "Pau Amarelo",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1992"
+  },
+  {
+    "id": "1993",
+    "code": "1993",
+    "name": "Conjunto Praia Do Janga",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1993"
+  },
+  {
+    "id": "1994",
+    "code": "1994",
+    "name": "Conjunto Beira Mar",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1994"
+  },
+  {
+    "id": "1995",
+    "code": "1995",
+    "name": "Pau Amarelo (Bacurau)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1995"
+  },
+  {
+    "id": "1996",
+    "code": "1996",
+    "name": "Arthur Lundgren Ii / Rio Doce (Paratibe)",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1996"
+  },
+  {
+    "id": "1998",
+    "code": "1998",
+    "name": "Caetés Iii / Ti Abreu E Lima",
+    "agency": "CNO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=1998"
+  },
+  {
+    "id": "200",
+    "code": "200",
+    "name": "Ti Jaboatão (Parador)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=200"
+  },
+  {
+    "id": "201",
+    "code": "201",
+    "name": "Moreno / Ti Jaboatão",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=201"
+  },
+  {
+    "id": "202",
+    "code": "202",
+    "name": "Ti Barro / Ti Macaxeira (Várzea)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=202"
+  },
+  {
+    "id": "203",
+    "code": "203",
+    "name": "Ti Barro / Zumbi Do Pacheco (Lot.)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=203"
+  },
+  {
+    "id": "2040",
+    "code": "2040",
+    "name": "Cdu / Boa Viagem / Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2040"
+  },
+  {
+    "id": "2043",
+    "code": "2043",
+    "name": "Ti Cdu / Ti Joana Bezerra (Parador)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2043"
+  },
+  {
+    "id": "205",
+    "code": "205",
+    "name": "Ti Barro / Ur-05 (Br-101)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=205"
+  },
+  {
+    "id": "206",
+    "code": "206",
+    "name": "Ti Barro / Ti Prazeres (Jordão)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=206"
+  },
+  {
+    "id": "2060",
+    "code": "2060",
+    "name": "Ti Tancredo Neves / Ti Macaxeira",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2060"
+  },
+  {
+    "id": "207",
+    "code": "207",
+    "name": "Ti Barro / Ti Macaxeira (Br-101)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=207"
+  },
+  {
+    "id": "208",
+    "code": "208",
+    "name": "Nossa Senhora Da Conceição / Ti Jaboatão",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=208"
+  },
+  {
+    "id": "209",
+    "code": "209",
+    "name": "Ti Barro / Coqueiral",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=209"
+  },
+  {
+    "id": "211",
+    "code": "211",
+    "name": "Vila Tamandaré",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=211"
+  },
+  {
+    "id": "212",
+    "code": "212",
+    "name": "Jardim São Paulo",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=212"
+  },
+  {
+    "id": "216",
+    "code": "216",
+    "name": "Ti Barro / Ti Cajueiro Seco",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=216"
+  },
+  {
+    "id": "219",
+    "code": "219",
+    "name": "Ti Tip / Ti Jaboatão (Sancho)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=219"
+  },
+  {
+    "id": "220",
+    "code": "220",
+    "name": "Ti Jaboatão / Ti Cavaleiro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=220"
+  },
+  {
+    "id": "221",
+    "code": "221",
+    "name": "Vila Cardeal E Silva",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=221"
+  },
+  {
+    "id": "222",
+    "code": "222",
+    "name": "Jardim Uchôa",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=222"
+  },
+  {
+    "id": "229",
+    "code": "229",
+    "name": "Marcos Freire (Opcional)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=229"
+  },
+  {
+    "id": "232",
+    "code": "232",
+    "name": "Cavaleiro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=232"
+  },
+  {
+    "id": "233",
+    "code": "233",
+    "name": "Cavaleiro (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=233"
+  },
+  {
+    "id": "238",
+    "code": "238",
+    "name": "Ti Jaboatão / Ti Barro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=238"
+  },
+  {
+    "id": "240",
+    "code": "240",
+    "name": "Cavaleiro / Ceasa",
+    "agency": "VML",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=240"
+  },
+  {
+    "id": "2402",
+    "code": "2402",
+    "name": "Parque Capibaribe / Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2402"
+  },
+  {
+    "id": "2410",
+    "code": "2410",
+    "name": "Parque Capibaribe / Ti Tip",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2410"
+  },
+  {
+    "id": "2416",
+    "code": "2416",
+    "name": "Roda De Fogo / Ti Getúlio Vargas",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2416"
+  },
+  {
+    "id": "2417",
+    "code": "2417",
+    "name": "Nova Morada / Ti Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2417"
+  },
+  {
+    "id": "2419",
+    "code": "2419",
+    "name": "Matriz Da Luz / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2419"
+  },
+  {
+    "id": "242",
+    "code": "242",
+    "name": "Pacheco (Floresta)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=242"
+  },
+  {
+    "id": "2420",
+    "code": "2420",
+    "name": "Muribara / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2420"
+  },
+  {
+    "id": "2421",
+    "code": "2421",
+    "name": "Torrões / Ti Getúlio Vargas",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2421"
+  },
+  {
+    "id": "2423",
+    "code": "2423",
+    "name": "Engenho Do Meio / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2423"
+  },
+  {
+    "id": "2427",
+    "code": "2427",
+    "name": "Monsenhor Fabrício (Bacurau)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2427"
+  },
+  {
+    "id": "2429",
+    "code": "2429",
+    "name": "Ti Getúlio Vargas / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2429"
+  },
+  {
+    "id": "243",
+    "code": "243",
+    "name": "Vila Dois Carneiros",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=243"
+  },
+  {
+    "id": "2431",
+    "code": "2431",
+    "name": "Ti Cdu / Ti Caxangá (Ufpe)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2431"
+  },
+  {
+    "id": "2433",
+    "code": "2433",
+    "name": "Brasilit / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2433"
+  },
+  {
+    "id": "2434",
+    "code": "2434",
+    "name": "Ti Getúlio Vargas / Tamarineira",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2434"
+  },
+  {
+    "id": "2437",
+    "code": "2437",
+    "name": "Ti Caxangá (Conde Boa Vista)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2437"
+  },
+  {
+    "id": "244",
+    "code": "244",
+    "name": "Alto Do Vento / Ti Cavaleiro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=244"
+  },
+  {
+    "id": "2441",
+    "code": "2441",
+    "name": "Ti Cdu (Conde Boa Vista)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2441"
+  },
+  {
+    "id": "2442",
+    "code": "2442",
+    "name": "Jd. Primavera (V. Pedreiras) / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2442"
+  },
+  {
+    "id": "2444",
+    "code": "2444",
+    "name": "Ti Getúlio Vargas (Conde Da Boa Vista)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2444"
+  },
+  {
+    "id": "2445",
+    "code": "2445",
+    "name": "Tabatinga / Ti Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2445"
+  },
+  {
+    "id": "2446",
+    "code": "2446",
+    "name": "Ur-07 (Várzea) / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2446"
+  },
+  {
+    "id": "2448",
+    "code": "2448",
+    "name": "Alto Santo Antônio / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2448"
+  },
+  {
+    "id": "245",
+    "code": "245",
+    "name": "Dois Carneiros / Ti Cavaleiro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=245"
+  },
+  {
+    "id": "2450",
+    "code": "2450",
+    "name": "Ti Camaragibe (Conde Boa Vista)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2450"
+  },
+  {
+    "id": "2456",
+    "code": "2456",
+    "name": "Viana / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2456"
+  },
+  {
+    "id": "2457",
+    "code": "2457",
+    "name": "São Lourenço (Bacurau)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2457"
+  },
+  {
+    "id": "2459",
+    "code": "2459",
+    "name": "Ti Cosme E Damião / Ti Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2459"
+  },
+  {
+    "id": "2462",
+    "code": "2462",
+    "name": "Lot. Santos Cosme Damião (Bacurau)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2462"
+  },
+  {
+    "id": "2463",
+    "code": "2463",
+    "name": "Araçoiaba / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2463"
+  },
+  {
+    "id": "2464",
+    "code": "2464",
+    "name": "Jardim Teresópolis / Ti Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2464"
+  },
+  {
+    "id": "2466",
+    "code": "2466",
+    "name": "Vera Cruz / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2466"
+  },
+  {
+    "id": "2467",
+    "code": "2467",
+    "name": "Chã De Cruz / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2467"
+  },
+  {
+    "id": "2470",
+    "code": "2470",
+    "name": "Circular Vila Da Fábrica/Santana (Via Bairro Dos Estados)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2470"
+  },
+  {
+    "id": "2473",
+    "code": "2473",
+    "name": "João Paulo Ii / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2473"
+  },
+  {
+    "id": "2475",
+    "code": "2475",
+    "name": "Timbi / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2475"
+  },
+  {
+    "id": "2476",
+    "code": "2476",
+    "name": "Santa Mônica / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2476"
+  },
+  {
+    "id": "2477",
+    "code": "2477",
+    "name": "Santa Terezinha / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2477"
+  },
+  {
+    "id": "2478",
+    "code": "2478",
+    "name": "Santana / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2478"
+  },
+  {
+    "id": "2481",
+    "code": "2481",
+    "name": "Ti Camaragibe / Ti Tip",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2481"
+  },
+  {
+    "id": "2483",
+    "code": "2483",
+    "name": "Lot. S. João E S. Paulo / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2483"
+  },
+  {
+    "id": "2486",
+    "code": "2486",
+    "name": "Penedo / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2486"
+  },
+  {
+    "id": "2487",
+    "code": "2487",
+    "name": "Várzea Fria / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2487"
+  },
+  {
+    "id": "2488",
+    "code": "2488",
+    "name": "Vila Da Fábrica / Ti Caxangá",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2488"
+  },
+  {
+    "id": "2490",
+    "code": "2490",
+    "name": "Ti Camaragibe / Ti Macaxeira",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2490"
+  },
+  {
+    "id": "2493",
+    "code": "2493",
+    "name": "Tiúma / Ti Camaragibe",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2493"
+  },
+  {
+    "id": "250",
+    "code": "250",
+    "name": "Ti Jaboatão / Santo Aleixo (Luz)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=250"
+  },
+  {
+    "id": "2501",
+    "code": "2501",
+    "name": "Circular Peroba / Oitenta / Borralho",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2501"
+  },
+  {
+    "id": "2502",
+    "code": "2502",
+    "name": "Circular Santa Mônica / Maranguape (V. Beira Rio)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2502"
+  },
+  {
+    "id": "2503",
+    "code": "2503",
+    "name": "Circular Quadra 30 (V. Celeiro)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2503"
+  },
+  {
+    "id": "2504",
+    "code": "2504",
+    "name": "Circular Vale Das Pedreiras (Shopping)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2504"
+  },
+  {
+    "id": "2505",
+    "code": "2505",
+    "name": "Circular Tabatinga / São Jorge (Via Fábrica)",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2505"
+  },
+  {
+    "id": "251",
+    "code": "251",
+    "name": "Ti Jaboatão / Santo Aleixo (Rios)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=251"
+  },
+  {
+    "id": "252",
+    "code": "252",
+    "name": "Vila Rica / Ti Jaboatão",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=252"
+  },
+  {
+    "id": "254",
+    "code": "254",
+    "name": "Jaboatão (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=254"
+  },
+  {
+    "id": "255",
+    "code": "255",
+    "name": "Quitandinha / Ti Cavaleiro",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=255"
+  },
+  {
+    "id": "256",
+    "code": "256",
+    "name": "Ti Cavaleiro / Lot. Nova Esperança",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=256"
+  },
+  {
+    "id": "258",
+    "code": "258",
+    "name": "Moreno (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=258"
+  },
+  {
+    "id": "261",
+    "code": "261",
+    "name": "Ti Jaboatão / Vila Piedade",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=261"
+  },
+  {
+    "id": "262",
+    "code": "262",
+    "name": "Ti Jaboatão / Malvinas",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=262"
+  },
+  {
+    "id": "272",
+    "code": "272",
+    "name": "Colônia / Ti Jaboatão",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=272"
+  },
+  {
+    "id": "274",
+    "code": "274",
+    "name": "Ti Jaboatão / Lote 56",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=274"
+  },
+  {
+    "id": "290",
+    "code": "290",
+    "name": "Ti Jaboatão / Bonança",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=290"
+  },
+  {
+    "id": "291",
+    "code": "291",
+    "name": "Ti Jaboatão / Moreno (Recife Outlet)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=291"
+  },
+  {
+    "id": "2920",
+    "code": "2920",
+    "name": "Ti Rio Doce / Ti Cdu",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2920"
+  },
+  {
+    "id": "2930",
+    "code": "2930",
+    "name": "Ti Rio Doce / Dois Irmãos",
+    "agency": "MOB",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=2930"
+  },
+  {
+    "id": "302",
+    "code": "302",
+    "name": "Caxangá / Ti Tip",
+    "agency": "VML",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=302"
+  },
+  {
+    "id": "303",
+    "code": "303",
+    "name": "Caxangá / Curado Ii (Br-232)",
+    "agency": "VML",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=303"
+  },
+  {
+    "id": "311",
+    "code": "311",
+    "name": "Bongi (Afogados)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=311"
+  },
+  {
+    "id": "312",
+    "code": "312",
+    "name": "Mustardinha",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=312"
+  },
+  {
+    "id": "313",
+    "code": "313",
+    "name": "San Martin (A. De Carvalho)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=313"
+  },
+  {
+    "id": "314",
+    "code": "314",
+    "name": "Mangueira",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=314"
+  },
+  {
+    "id": "315",
+    "code": "315",
+    "name": "Bongi",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=315"
+  },
+  {
+    "id": "320",
+    "code": "320",
+    "name": "Curado I / Ti Santa Luzia",
+    "agency": "VML",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=320"
+  },
+  {
+    "id": "321",
+    "code": "321",
+    "name": "Jardim São Paulo (A. Carvalho)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=321"
+  },
+  {
+    "id": "322",
+    "code": "322",
+    "name": "Jardim São Paulo (Bacurau)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=322"
+  },
+  {
+    "id": "324",
+    "code": "324",
+    "name": "Jardim São Paulo (Piracicaba)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=324"
+  },
+  {
+    "id": "330",
+    "code": "330",
+    "name": "Casa Amarela / Cdu (Av. Caxangá)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=330"
+  },
+  {
+    "id": "331",
+    "code": "331",
+    "name": "Totó (Jardim Planalto)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=331"
+  },
+  {
+    "id": "332",
+    "code": "332",
+    "name": "Totó (Abdias De Carvalho)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=332"
+  },
+  {
+    "id": "333",
+    "code": "333",
+    "name": "Totó (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=333"
+  },
+  {
+    "id": "341",
+    "code": "341",
+    "name": "Curado I",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=341"
+  },
+  {
+    "id": "342",
+    "code": "342",
+    "name": "Curados (Opcional)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=342"
+  },
+  {
+    "id": "346",
+    "code": "346",
+    "name": "Ti Tip (Conde Boa Vista)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=346"
+  },
+  {
+    "id": "347",
+    "code": "347",
+    "name": "Ti Tip / Joana Bezerra",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=347"
+  },
+  {
+    "id": "348",
+    "code": "348",
+    "name": "Ti Tip / Curado V",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=348"
+  },
+  {
+    "id": "351",
+    "code": "351",
+    "name": "Ti Tip / Curado Ii",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=351"
+  },
+  {
+    "id": "352",
+    "code": "352",
+    "name": "Curado Ii (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=352"
+  },
+  {
+    "id": "360",
+    "code": "360",
+    "name": "Totó / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=360"
+  },
+  {
+    "id": "361",
+    "code": "361",
+    "name": "Ti Tip / Curado Iv (Rua 14)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=361"
+  },
+  {
+    "id": "362",
+    "code": "362",
+    "name": "Curado Iv (Bacurau)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=362"
+  },
+  {
+    "id": "363",
+    "code": "363",
+    "name": "Ti Tip / Curado Iv (Av. 01)",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=363"
+  },
+  {
+    "id": "370",
+    "code": "370",
+    "name": "Ti Tip / Ti Aeroporto",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=370"
+  },
+  {
+    "id": "411",
+    "code": "411",
+    "name": "Plaza Shopping (Conde Da Boa Vista)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=411"
+  },
+  {
+    "id": "412",
+    "code": "412",
+    "name": "Ti Santa Luzia / Ti Getúlio Vargas",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=412"
+  },
+  {
+    "id": "4123",
+    "code": "4123",
+    "name": "Três Carneiros Baixo (Cais De Santa Rita)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=4123"
+  },
+  {
+    "id": "4133",
+    "code": "4133",
+    "name": "Três Carneiros (Cais De Santa Rita)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=4133"
+  },
+  {
+    "id": "4137",
+    "code": "4137",
+    "name": "Ur-11 (Cais De Santa Rita)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=4137"
+  },
+  {
+    "id": "414",
+    "code": "414",
+    "name": "Torre",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=414"
+  },
+  {
+    "id": "418",
+    "code": "418",
+    "name": "Tiúma / Camaragibe",
+    "agency": "CTC",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=418"
+  },
+  {
+    "id": "424",
+    "code": "424",
+    "name": "Cdu / Largo Da Paz (Via Torrões/San Martin)",
+    "agency": "EME",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=424"
+  },
+  {
+    "id": "440",
+    "code": "440",
+    "name": "Cdu / Caxangá / Boa Viagem",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=440"
+  },
+  {
+    "id": "510",
+    "code": "510",
+    "name": "Nova Descoberta / Derby",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=510"
+  },
+  {
+    "id": "511",
+    "code": "511",
+    "name": "Ti Cdu / Casa Amarela / Alto Do Mandu",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=511"
+  },
+  {
+    "id": "513",
+    "code": "513",
+    "name": "Córrego Da Areia",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=513"
+  },
+  {
+    "id": "514",
+    "code": "514",
+    "name": "Nova Descoberta (Cór. Do Joaquim)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=514"
+  },
+  {
+    "id": "515",
+    "code": "515",
+    "name": "Nova Descoberta (Bacurau)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=515"
+  },
+  {
+    "id": "516",
+    "code": "516",
+    "name": "Casa Amarela / Torre / Cde. Boa Vista",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=516"
+  },
+  {
+    "id": "517",
+    "code": "517",
+    "name": "Córrego Do Inácio",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=517"
+  },
+  {
+    "id": "520",
+    "code": "520",
+    "name": "Ti Macaxeira / Parnamirim",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=520"
+  },
+  {
+    "id": "521",
+    "code": "521",
+    "name": "Alto Santa Isabel (Cde. Boa Vista)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=521"
+  },
+  {
+    "id": "522",
+    "code": "522",
+    "name": "Dois Irmãos (Rui Barbosa E Príncipe)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=522"
+  },
+  {
+    "id": "523",
+    "code": "523",
+    "name": "Dois Irmãos (Bacurau)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=523"
+  },
+  {
+    "id": "524",
+    "code": "524",
+    "name": "Sítio Dos Pintos (Dois Irmãos)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=524"
+  },
+  {
+    "id": "532",
+    "code": "532",
+    "name": "Dois Irmãos / Casa Amarela (Cruz Cabugá)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=532"
+  },
+  {
+    "id": "533",
+    "code": "533",
+    "name": "Casa Amarela (Bacurau)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=533"
+  },
+  {
+    "id": "601",
+    "code": "601",
+    "name": "Ti Macaxeira / P.R. Bola Na Rede",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=601"
+  },
+  {
+    "id": "604",
+    "code": "604",
+    "name": "Ti Macaxeira / Alto Do Burity",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=604"
+  },
+  {
+    "id": "611",
+    "code": "611",
+    "name": "Alto José Do Pinho (Cais De Santa Rita)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=611"
+  },
+  {
+    "id": "612",
+    "code": "612",
+    "name": "Morro Da Conceição (Cruz Cabugá)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=612"
+  },
+  {
+    "id": "613",
+    "code": "613",
+    "name": "Morro Da Conceição (Bacurau)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=613"
+  },
+  {
+    "id": "621",
+    "code": "621",
+    "name": "Alto Treze De Maio (Príncipe)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=621"
+  },
+  {
+    "id": "622",
+    "code": "622",
+    "name": "Vasco Da Gama (Cruz Cabugá)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=622"
+  },
+  {
+    "id": "623",
+    "code": "623",
+    "name": "Vasco Da Gama (João De Barros)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=623"
+  },
+  {
+    "id": "624",
+    "code": "624",
+    "name": "Brejo (Cde. Boa Vista)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=624"
+  },
+  {
+    "id": "626",
+    "code": "626",
+    "name": "Brejo (Bacurau)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=626"
+  },
+  {
+    "id": "630",
+    "code": "630",
+    "name": "Vasco Da Gama / Derby",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=630"
+  },
+  {
+    "id": "631",
+    "code": "631",
+    "name": "Nova Descoberta (Cabugá)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=631"
+  },
+  {
+    "id": "632",
+    "code": "632",
+    "name": "Alto Do Refúgio (Cabugá)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=632"
+  },
+  {
+    "id": "640",
+    "code": "640",
+    "name": "Guabiraba / Derby (Joana Bezerra)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=640"
+  },
+  {
+    "id": "641",
+    "code": "641",
+    "name": "Ti Macaxeira / Encruzilhada",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=641"
+  },
+  {
+    "id": "642",
+    "code": "642",
+    "name": "Guabiraba (Córrego Do Jenipapo)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=642"
+  },
+  {
+    "id": "643",
+    "code": "643",
+    "name": "Córrego Do Jenipapo (Bacurau)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=643"
+  },
+  {
+    "id": "644",
+    "code": "644",
+    "name": "Largo Do Maracanã (Conde Da Boa Vista)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=644"
+  },
+  {
+    "id": "645",
+    "code": "645",
+    "name": "Ti Macaxeira (Av. Norte)",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=645"
+  },
+  {
+    "id": "650",
+    "code": "650",
+    "name": "Ti Macaxeira / Ti Xambá",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=650"
+  },
+  {
+    "id": "680",
+    "code": "680",
+    "name": "Vasco Da Gama / Afogados",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=680"
+  },
+  {
+    "id": "700",
+    "code": "700",
+    "name": "Beberibe / Afogados",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=700"
+  },
+  {
+    "id": "710",
+    "code": "710",
+    "name": "Beberibe / Derby (Joana Bezerra)",
+    "agency": "GLO",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=710"
+  },
+  {
+    "id": "711",
+    "code": "711",
+    "name": "Alto Do Pascoal",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=711"
+  },
+  {
+    "id": "712",
+    "code": "712",
+    "name": "Alto Santa Terezinha",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=712"
+  },
+  {
+    "id": "713",
+    "code": "713",
+    "name": "Bomba Do Hemetério",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=713"
+  },
+  {
+    "id": "714",
+    "code": "714",
+    "name": "Alto José Bonifácio (Av. Norte)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=714"
+  },
+  {
+    "id": "715",
+    "code": "715",
+    "name": "Alto Santa Terezinha (Bacurau)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=715"
+  },
+  {
+    "id": "717",
+    "code": "717",
+    "name": "José Amarino Dos Reis",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=717"
+  },
+  {
+    "id": "718",
+    "code": "718",
+    "name": "Córrego Do Euclides / Derby",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=718"
+  },
+  {
+    "id": "721",
+    "code": "721",
+    "name": "Água Fria (Circular)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=721"
+  },
+  {
+    "id": "722",
+    "code": "722",
+    "name": "Campina Do Barreto",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=722"
+  },
+  {
+    "id": "723",
+    "code": "723",
+    "name": "Cajueiro",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=723"
+  },
+  {
+    "id": "724",
+    "code": "724",
+    "name": "Chão De Estrelas",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=724"
+  },
+  {
+    "id": "741",
+    "code": "741",
+    "name": "Dois Unidos",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=741"
+  },
+  {
+    "id": "742",
+    "code": "742",
+    "name": "Linha Do Tiro",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=742"
+  },
+  {
+    "id": "743",
+    "code": "743",
+    "name": "Alto José Bonifácio (J. Barros)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=743"
+  },
+  {
+    "id": "744",
+    "code": "744",
+    "name": "Dois Unidos (Bacurau)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=744"
+  },
+  {
+    "id": "745",
+    "code": "745",
+    "name": "Alto José Bonifácio (Bacurau)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=745"
+  },
+  {
+    "id": "746",
+    "code": "746",
+    "name": "Alto Do Capitão",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=746"
+  },
+  {
+    "id": "760",
+    "code": "760",
+    "name": "Dois Unidos / Derby",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=760"
+  },
+  {
+    "id": "780",
+    "code": "780",
+    "name": "Alto Santa Terezinha / Derby",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=780"
+  },
+  {
+    "id": "800",
+    "code": "800",
+    "name": "Dois Unidos / Afogados",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=800"
+  },
+  {
+    "id": "810",
+    "code": "810",
+    "name": "Ti Xambá / Encruzilhada",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=810"
+  },
+  {
+    "id": "820",
+    "code": "820",
+    "name": "Ti Xambá (Cabugá)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=820"
+  },
+  {
+    "id": "821",
+    "code": "821",
+    "name": "Jardim Brasil I (Est. De Belém)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=821"
+  },
+  {
+    "id": "822",
+    "code": "822",
+    "name": "Jardim Brasil I (Cruz Cabugá)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=822"
+  },
+  {
+    "id": "823",
+    "code": "823",
+    "name": "Jardim Brasil Ii (Est. De Belém)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=823"
+  },
+  {
+    "id": "824",
+    "code": "824",
+    "name": "Jardim Brasil Ii (Cruz Cabugá)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=824"
+  },
+  {
+    "id": "825",
+    "code": "825",
+    "name": "Jardim Brasil / Ti Joana Bezerra",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=825"
+  },
+  {
+    "id": "827",
+    "code": "827",
+    "name": "Jardim Brasil (Bacurau)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=827"
+  },
+  {
+    "id": "831",
+    "code": "831",
+    "name": "Aguazinha / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=831"
+  },
+  {
+    "id": "841",
+    "code": "841",
+    "name": "Nova Olinda / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=841"
+  },
+  {
+    "id": "842",
+    "code": "842",
+    "name": "Águas Compridas / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=842"
+  },
+  {
+    "id": "843",
+    "code": "843",
+    "name": "Alto Da Bondade / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=843"
+  },
+  {
+    "id": "844",
+    "code": "844",
+    "name": "Santa Casa / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=844"
+  },
+  {
+    "id": "846",
+    "code": "846",
+    "name": "Águas Compridas (Bacurau)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=846"
+  },
+  {
+    "id": "847",
+    "code": "847",
+    "name": "Alto Nova Olinda / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=847"
+  },
+  {
+    "id": "852",
+    "code": "852",
+    "name": "Caixa D'Água / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=852"
+  },
+  {
+    "id": "858",
+    "code": "858",
+    "name": "Ti Joana Bezerra / Ti Afogados / Ti Barro",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=858"
+  },
+  {
+    "id": "860",
+    "code": "860",
+    "name": "Ti Xambá (Príncipe)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=860"
+  },
+  {
+    "id": "861",
+    "code": "861",
+    "name": "Ti Joana Bezerra / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=861"
+  },
+  {
+    "id": "870",
+    "code": "870",
+    "name": "Ti Xambá / Ti Largo Da Paz",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=870"
+  },
+  {
+    "id": "881",
+    "code": "881",
+    "name": "Ti Xambá / Rio Doce (Av. Getúlio Vargas)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=881"
+  },
+  {
+    "id": "882",
+    "code": "882",
+    "name": "Ti Xambá / Rio Doce (Carlos De Lima Cavalcanti)",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=882"
+  },
+  {
+    "id": "883",
+    "code": "883",
+    "name": "Ti Pe-15 / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=883"
+  },
+  {
+    "id": "884",
+    "code": "884",
+    "name": "Jardim Brasil / Rio Doce",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=884"
+  },
+  {
+    "id": "885",
+    "code": "885",
+    "name": "Sítio Novo / Rio Doce",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=885"
+  },
+  {
+    "id": "886",
+    "code": "886",
+    "name": "Ouro Preto / Rio Doce",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=886"
+  },
+  {
+    "id": "892",
+    "code": "892",
+    "name": "Alto Do Cajueiro / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=892"
+  },
+  {
+    "id": "893",
+    "code": "893",
+    "name": "Ti Pe-15 / Alto Da Conquista",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=893"
+  },
+  {
+    "id": "894",
+    "code": "894",
+    "name": "Ti Xambá / Córrego Do Abacaxi",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=894"
+  },
+  {
+    "id": "895",
+    "code": "895",
+    "name": "Alto Sol Nascente / Ti Xambá",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=895"
+  },
+  {
+    "id": "901",
+    "code": "901",
+    "name": "Ti Abreu E Lima / Ti Macaxeira",
+    "agency": "CSR",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=901"
+  },
+  {
+    "id": "910",
+    "code": "910",
+    "name": "Piedade / Ti Rio Doce",
+    "agency": "BOA",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=910"
+  },
+  {
+    "id": "914",
+    "code": "914",
+    "name": "Ti Pe-15 / Ti Afogados",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=914"
+  },
+  {
+    "id": "916",
+    "code": "916",
+    "name": "Ouro Preto / Joana Bezerra",
+    "agency": "CAX",
+    "type": 3,
+    "url": "https://virtual.granderecife.pe.gov.br/rumo/?codigo-linha=916"
+  }
+]
