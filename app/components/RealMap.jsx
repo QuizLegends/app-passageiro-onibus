@@ -5,81 +5,75 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115]; // [lng, lat] Jaboatão / Recife
 
-// Busca paradas reais de ônibus via API direta e gratuita do Overpass (OpenStreetMap)
-async function fetchRealStopsFromOverpass(bounds) {
-  const [south, west, north, east] = bounds;
-  
-  // Query Overpass para pegar nós de paradas de ônibus e plataformas de transporte
-  const query = `
-    [out:json][timeout:10];
-    (
-      node["highway"="bus_stop"](${south},${west},${north},${east});
-      node["public_transport"="platform"](${south},${west},${north},${east});
-      node["amenity"="bus_station"](${south},${west},${north},${east});
-    );
-    out body 50;
-  `;
+// Busca paradas reais com rota e dados do OpenStreetMap sem cair no bloqueio de limite
+async function fetchStopsDirect(south, west, north, east) {
+  const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:15];node["highway"="bus_stop"](${south},${west},${north},${east});out%20body%2060;`;
 
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query)
-    });
-    
-    if (!res.ok) return { type: 'FeatureCollection', features: [] };
+    const res = await fetch(overpassUrl);
+    if (!res.ok) return [];
     const data = await res.json();
 
     if (data && data.elements) {
-      return {
-        type: 'FeatureCollection',
-        features: data.elements.map(el => ({
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [el.lon, el.lat]
-          },
-          properties: {
-            id: el.id.toString(),
-            name: el.tags?.name || el.tags?.description || 'Parada de Ônibus',
-            address: el.tags?.['addr:street'] ? `Rua: ${el.tags['addr:street']}` : 'Parada de transporte público'
-          }
-        }))
-      };
+      return data.elements.map(el => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [el.lon, el.lat]
+        },
+        properties: {
+          id: el.id.toString(),
+          name: el.tags?.name || el.tags?.description || 'Parada de Ônibus',
+          address: el.tags?.['addr:street'] ? `Rua ${el.tags['addr:street']}` : 'Ponto de Ônibus'
+        }
+      }));
     }
   } catch (err) {
-    console.error('Erro ao buscar paradas no Overpass:', err);
+    console.error('Erro na busca de paradas:', err);
   }
-  return { type: 'FeatureCollection', features: [] };
+  return [];
 }
 
-const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRoute }, ref) => {
+const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
+  const userPosRef = useRef(null);
 
   const [userPos, setUserPos] = useState(null);
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Recentraliza no GPS somente ao clicar no botão
+  // Função disparada manualmente pelo botão GPS
   useImperativeHandle(ref, () => ({
     recenter: () => {
-      if (mapRef.current && userPos) {
-        mapRef.current.flyTo({ center: userPos, zoom: 16, essential: true });
+      const currentPos = userPosRef.current || userPos;
+      if (mapRef.current && currentPos) {
+        mapRef.current.flyTo({
+          center: currentPos,
+          zoom: 16,
+          essential: true
+        });
       }
     }
   }));
 
-  // Atualiza as paradas buscando do Overpass de acordo com o limite visível do mapa
-  const updateStops = async (map) => {
+  // Carrega paradas na área visível
+  const loadStopsInView = async (map) => {
     if (!map) return;
-    const b = map.getBounds();
-    const boundsArray = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()];
-    
-    const geojson = await fetchRealStopsFromOverpass(boundsArray);
+    const bounds = map.getBounds();
+    const features = await fetchStopsDirect(
+      bounds.getSouth(),
+      bounds.getWest(),
+      bounds.getNorth(),
+      bounds.getEast()
+    );
 
     if (map.getSource('bus-stops-source')) {
-      map.getSource('bus-stops-source').setData(geojson);
+      map.getSource('bus-stops-source').setData({
+        type: 'FeatureCollection',
+        features
+      });
     }
   };
 
@@ -101,7 +95,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // Camada nativa das paradas (Fixas no solo do mapa)
+      // Camada para paradas (Ícones fixos na camada nativa GeoJSON)
       map.addSource('bus-stops-source', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -130,7 +124,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         }
       });
 
-      // Clique na parada
+      // Clique em uma parada
       map.on('click', 'bus-stops-circle', (e) => {
         if (!e.features || e.features.length === 0) return;
 
@@ -166,21 +160,22 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         map.getCanvas().style.cursor = '';
       });
 
-      // Carrega as paradas da área visível assim que o mapa carrega
-      updateStops(map);
+      // Busca inicial de paradas
+      loadStopsInView(map);
     });
 
-    // Quando o usuário terminar de mover/arrastar o mapa, carrega as paradas da nova área
+    // Quando o usuário termina de arrastar o mapa, recarrega as paradas daquela área
     map.on('moveend', () => {
-      updateStops(map);
+      loadStopsInView(map);
     });
 
-    // Pega GPS e coloca marcador azul SEM puxar ou mexer a câmera do mapa
+    // Acompanha a localização GPS real sem forçar a movimentação da tela
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
           const coords = [pos.coords.longitude, pos.coords.latitude];
           setUserPos(coords);
+          userPosRef.current = coords;
 
           if (!userMarkerRef.current) {
             const el = document.createElement('div');
@@ -193,7 +188,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
             userMarkerRef.current.setLngLat(coords);
           }
         },
-        (err) => console.warn('Aviso GPS:', err.message),
+        (err) => console.warn('GPS Warning:', err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
