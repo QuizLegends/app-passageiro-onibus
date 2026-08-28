@@ -1,40 +1,33 @@
 'use client';
 
-import { useEffect, useRef, useState, forwardRef, useCallback } from 'react';
+import { useEffect, useRef, useState, forwardRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css';
 
-// Token do Mapbox carregado a partir do seu .env.local
-mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+const defaultCenter = [-34.8711, -8.0631]; // Recife/Jaboatão [lng, lat]
 
-// Coordenada padrão (Recife / Jaboatão)
-const defaultCenter = [-34.8711, -8.0631]; // Mapbox usa [longitude, latitude]
-
-// Busca rota real a pé pelas ruas usando a API do Mapbox
-async function fetchMapboxWalkingRoute(startLon, startLat, endLon, endLat) {
+// Busca rota a pé na Mapbox Directions API
+async function fetchMapboxWalkingRoute(startLon, startLat, endLon, endLat, token) {
   try {
-    const token = mapboxgl.accessToken;
     const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${startLon},${startLat};${endLon},${endLat}?geometries=geojson&access_token=${token}`;
     const res = await fetch(url);
     const data = await res.json();
 
     if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0];
       return {
-        geometry: route.geometry,
-        distance: Math.round(route.distance) // metros
+        geometry: data.routes[0].geometry,
+        distance: Math.round(data.routes[0].distance) // distância em metros
       };
     }
   } catch (err) {
-    console.error('Erro na Rota do Mapbox:', err);
+    console.error('Erro na Rota Mapbox:', err);
   }
   return null;
 }
 
-// Busca a parada de ônibus real mais próxima usando a Overpass API/OSM
+// Busca parada de ônibus mais próxima no OpenStreetMap
 async function fetchNearestRealBusStop(lat, lon) {
   try {
-    const query = `[out:json];(node["highway"="bus_stop"](around:700,${lat},${lon});node["public_transport"="platform"](around:700,${lat},${lon}););out;`;
+    const query = `[out:json];(node["highway"="bus_stop"](around:800,${lat},${lon});node["public_transport"="platform"](around:800,${lat},${lon}););out;`;
     const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
     const res = await fetch(url);
     const data = await res.json();
@@ -63,109 +56,99 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
 
   const [userPos, setUserPos] = useState(null);
   const [nearestStop, setNearestStop] = useState(null);
-  const lastDestinationIdRef = useRef(null);
+  const [tokenError, setTokenError] = useState(false);
 
-  // 1. Inicializa o Mapa do Mapbox
+  const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+  // 1. Inicialização do Mapa e Verificação de Token
   useEffect(() => {
+    if (!token) {
+      console.error('NEXT_PUBLIC_MAPBOX_TOKEN não encontrada!');
+      setTokenError(true);
+      return;
+    }
+
+    mapboxgl.accessToken = token;
     if (mapRef.current) return;
 
-    const map = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      style: 'mapbox://styles/mapbox/navigation-day-v1', // Estilo vetor limpo (Waze/Uber)
-      center: defaultCenter,
-      zoom: 14,
-      attributionControl: false
-    });
-
-    mapRef.current = map;
-
-    // Configuração da camada para a linha azul translúcida
-    map.on('load', () => {
-      map.addSource('route-walking', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: { type: 'LineString', coordinates: [] }
-        }
+    try {
+      const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: 'mapbox://styles/mapbox/navigation-day-v1',
+        center: defaultCenter,
+        zoom: 14,
+        attributionControl: false
       });
 
-      map.addLayer({
-        id: 'route-walking-line',
-        type: 'line',
-        source: 'route-walking',
-        layout: {
-          'line-join': 'round',
-          'line-cap': 'round'
-        },
-        paint: {
-          'line-color': '#2563eb',
-          'line-width': 5,
-          'line-opacity': 0.5, // Semi-transparente para ver o nome da rua
-          'line-dasharray': [2, 2] // Pontilhada
-        }
-      });
-    });
+      mapRef.current = map;
 
-    // Geolocalização Contínua do Usuário
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(
-        (pos) => {
-          const coords = [pos.coords.longitude, pos.coords.latitude];
-          setUserPos(coords);
-
-          // Cria ou atualiza marcador do usuário (Ponto Azul)
-          if (!userMarkerRef.current) {
-            const el = document.createElement('div');
-            el.className = 'custom-user-marker';
-            el.style.cssText = 'width: 20px; height: 20px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
-
-            userMarkerRef.current = new mapboxgl.Marker(el)
-              .setLngLat(coords)
-              .addTo(map);
-
-            map.flyTo({ center: coords, zoom: 15 });
-          } else {
-            userMarkerRef.current.setLngLat(coords);
+      map.on('load', () => {
+        map.addSource('route-walking', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: [] }
           }
-        },
-        (err) => console.warn('Erro ao obter GPS:', err),
-        { enableHighAccuracy: true }
-      );
-    }
+        });
 
-    return () => map.remove();
-  }, []);
-
-  // 2. Botão "Minha Localização"
-  useEffect(() => {
-    if (triggerRecenter > 0 && mapRef.current && userPos) {
-      mapRef.current.flyTo({ center: userPos, zoom: 16, essential: true });
-    }
-  }, [triggerRecenter, userPos]);
-
-  // 3. Focar na Parada ("Ver no Mapa")
-  useEffect(() => {
-    if (focusStopTrigger > 0 && mapRef.current && nearestStop) {
-      mapRef.current.flyTo({
-        center: [nearestStop.lon, nearestStop.lat],
-        zoom: 18,
-        essential: true
+        map.addLayer({
+          id: 'route-walking-line',
+          type: 'line',
+          source: 'route-walking',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#2563eb',
+            'line-width': 5,
+            'line-opacity': 0.55,
+            'line-dasharray': [2, 2]
+          }
+        });
       });
+
+      // GPS do Usuário
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+          (pos) => {
+            const coords = [pos.coords.longitude, pos.coords.latitude];
+            setUserPos(coords);
+
+            if (!userMarkerRef.current) {
+              const el = document.createElement('div');
+              el.style.cssText = 'width: 20px; height: 20px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
+
+              userMarkerRef.current = new mapboxgl.Marker(el)
+                .setLngLat(coords)
+                .addTo(map);
+
+              map.flyTo({ center: coords, zoom: 15 });
+            } else {
+              userMarkerRef.current.setLngLat(coords);
+            }
+          },
+          (err) => console.warn('Erro GPS:', err),
+          { enableHighAccuracy: true }
+        );
+      }
+    } catch (e) {
+      console.error('Erro ao carregar Mapbox:', e);
+      setTokenError(true);
     }
-  }, [focusStopTrigger, nearestStop]);
 
-  // 4. Processar Destino Selecionado
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [token]);
+
+  // 2. Traçar rota e buscar parada ao definir destino
   useEffect(() => {
-    if (!targetDestination || !mapRef.current) return;
-
-    const destId = `${targetDestination.lat}-${targetDestination.lon}`;
-    if (lastDestinationIdRef.current === destId) return;
-    lastDestinationIdRef.current = destId;
+    if (!targetDestination || !mapRef.current || !token) return;
 
     const map = mapRef.current;
     const startCoords = userPos || defaultCenter;
 
-    // Marcador do Destino (Pino Vermelho)
     if (destMarkerRef.current) destMarkerRef.current.remove();
     const destEl = document.createElement('div');
     destEl.style.cssText = 'background: #dc2626; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 14px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
@@ -175,7 +158,6 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
       .addTo(map);
 
     async function calculateNavigation() {
-      // Busca a parada mais próxima
       let stop = await fetchNearestRealBusStop(startCoords[1], startCoords[0]);
 
       if (!stop) {
@@ -187,7 +169,6 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
         };
       }
 
-      // Marcador da Parada (Ônibus Verde)
       if (stopMarkerRef.current) stopMarkerRef.current.remove();
       const stopEl = document.createElement('div');
       stopEl.style.cssText = 'background: #16a34a; width: 32px; height: 32px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-size: 15px; color: white; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
@@ -196,28 +177,28 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
         .setLngLat([stop.lon, stop.lat])
         .addTo(map);
 
-      // Traça rota a pé no Mapbox
       const routeData = await fetchMapboxWalkingRoute(
         startCoords[0], startCoords[1],
-        stop.lon, stop.lat
+        stop.lon, stop.lat,
+        token
       );
 
       if (routeData) {
         stop.distance = routeData.distance;
 
-        // Atualiza a linha no mapa
         if (map.getSource('route-walking')) {
           map.getSource('route-walking').setData({
             type: 'Feature',
             geometry: routeData.geometry
           });
         }
+      } else {
+        stop.distance = 150;
       }
 
       setNearestStop(stop);
       if (onNearestStopFound) onNearestStopFound(stop);
 
-      // Enquadra passageiro e parada
       const bounds = new mapboxgl.LngLatBounds()
         .extend(startCoords)
         .extend([stop.lon, stop.lat]);
@@ -226,7 +207,16 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
     }
 
     calculateNavigation();
-  }, [targetDestination, userPos, onNearestStopFound]);
+  }, [targetDestination, userPos, token, onNearestStopFound]);
+
+  if (tokenError) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-gray-900 text-white p-6 text-center">
+        <p className="text-red-400 font-bold mb-2">Erro ao carregar o Mapa</p>
+        <p className="text-sm text-gray-300">A chave <code className="bg-gray-800 px-2 py-1 rounded">NEXT_PUBLIC_MAPBOX_TOKEN</code> precisa estar configurada na Vercel.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full relative">
