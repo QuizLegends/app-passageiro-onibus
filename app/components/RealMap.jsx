@@ -21,10 +21,10 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   return Math.round(R * c);
 }
 
-function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger }) {
+function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger, nearestStop }) {
   const map = useMap();
   const userPosRef = useRef(null);
-  const nearestStopRef = useRef(null);
+  const hasFittedBoundsRef = useRef(false);
 
   // Captura a posição do GPS do passageiro
   useEffect(() => {
@@ -43,23 +43,26 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
   // Recentralizar no Usuário quando clicar no botão da barra inferior
   useEffect(() => {
     if (triggerRecenter > 0 && userPosRef.current) {
-      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.5 });
+      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.8 });
     }
   }, [triggerRecenter, map]);
 
   // ANIMAÇÃO VER NO MAPA: Foca e dá super zoom na Parada de Embarque ao tocar no card/botão
   useEffect(() => {
-    if (focusStopTrigger > 0 && nearestStopRef.current) {
-      map.flyTo([nearestStopRef.current.lat, nearestStopRef.current.lon], 18, {
+    if (focusStopTrigger > 0 && nearestStop) {
+      map.flyTo([nearestStop.lat, nearestStop.lon], 18, {
         animate: true,
-        duration: 1.0
+        duration: 1.2
       });
     }
-  }, [focusStopTrigger, map]);
+  }, [focusStopTrigger, nearestStop, map]);
 
-  // Calcula a parada de embarque instantaneamente assim que o destino é selecionado
+  // Calcula a parada de embarque e ajusta os limites UMA ÚNICA VEZ por destino
   useEffect(() => {
-    if (!targetDestination) return;
+    if (!targetDestination) {
+      hasFittedBoundsRef.current = false;
+      return;
+    }
 
     let userLat = -8.0631;
     let userLon = -34.8711;
@@ -68,12 +71,15 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
       [userLat, userLon] = userPosRef.current;
     }
 
-    // Ajusta a câmera do mapa para abranger o passageiro e o destino
-    const bounds = L.latLngBounds([
-      [userLat, userLon],
-      [targetDestination.lat, targetDestination.lon]
-    ]);
-    map.fitBounds(bounds, { padding: [60, 60] });
+    // Ajusta o enquadramento apenas na primeira seleção do destino
+    if (!hasFittedBoundsRef.current) {
+      const bounds = L.latLngBounds([
+        [userLat, userLon],
+        [targetDestination.lat, targetDestination.lon]
+      ]);
+      map.fitBounds(bounds, { padding: [60, 60] });
+      hasFittedBoundsRef.current = true;
+    }
 
     // Ponto de parada calculado na direção do percurso
     const stopLat = userLat + (targetDestination.lat - userLat) * 0.08;
@@ -88,7 +94,6 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
       distance: dist > 50 ? dist : 120
     };
 
-    nearestStopRef.current = calculatedStop;
     onNearestStopFound(calculatedStop);
   }, [targetDestination, map, onNearestStopFound]);
 
@@ -101,7 +106,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
   const [icons, setIcons] = useState(null);
   const defaultCenter = [-8.0631, -34.8711];
 
-  // Cria os ícones do Leaflet somente no client-side (navegador)
+  // Cria os ícones do Leaflet apenas no navegador (Client-Side)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIcons({
@@ -155,6 +160,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           targetDestination={targetDestination}
           onNearestStopFound={handleStopFound}
           focusStopTrigger={focusStopTrigger}
+          nearestStop={nearestStop}
         />
 
         {/* 1. Passageiro (Bolinha azul) */}
