@@ -67,7 +67,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Botão de recentralizar manual do usuário
+  // Recentralizar ÚNICA E EXCLUSIVAMENTE quando o usuário clica no botão GPS
   useImperativeHandle(ref, () => ({
     recenter: () => {
       if (mapRef.current && userPos) {
@@ -104,13 +104,12 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // 1. Fonte e camada para as paradas (Renderização Nativa Fixa no Solo)
+      // Fonte e camada para as paradas (Nativa e Fixa no Solo)
       map.addSource('bus-stops-source', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
       });
 
-      // Círculo de fundo verde
       map.addLayer({
         id: 'bus-stops-circle',
         type: 'circle',
@@ -123,7 +122,6 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         }
       });
 
-      // Rótulo com o texto/ícone
       map.addLayer({
         id: 'bus-stops-icon',
         type: 'symbol',
@@ -135,7 +133,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         }
       });
 
-      // Evento de clique nativo na parada
+      // Clique na parada
       map.on('click', 'bus-stops-circle', (e) => {
         if (!e.features || e.features.length === 0) return;
 
@@ -164,7 +162,6 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         }
       });
 
-      // Troca ponteiro do mouse ao passar por cima
       map.on('mouseenter', 'bus-stops-circle', () => {
         map.getCanvas().style.cursor = 'pointer';
       });
@@ -172,7 +169,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         map.getCanvas().style.cursor = '';
       });
 
-      // Camada para a rota a pé pontilhada
+      // Camada para a rota
       if (!map.getSource('route-walking')) {
         map.addSource('route-walking', {
           type: 'geojson',
@@ -196,11 +193,10 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         });
       }
 
-      // Carrega paradas iniciais sem forçar zoom
       loadStopsGeoJSON(map, defaultCenter[0], defaultCenter[1]);
     });
 
-    // Captura do GPS: Apenas atualiza a posição do marcador azul, sem dar zoom/flyTo
+    // Apenas armazena a coordenada do usuário e posiciona a bolinha azul SEM mover a câmera do mapa
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -214,9 +210,6 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
             userMarkerRef.current = new mapboxgl.Marker(el)
               .setLngLat(coords)
               .addTo(map);
-
-            // Carrega paradas da região no início sem alterar o zoom da câmera
-            loadStopsGeoJSON(map, coords[0], coords[1]);
           } else {
             userMarkerRef.current.setLngLat(coords);
           }
@@ -242,7 +235,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
     }
   }, [triggerRecenter, userPos]);
 
-  // Traçar Rota a Pé sem alterar o zoom de forma brusca
+  // Traçar Rota a Pé
   useEffect(() => {
     if (!selectedStopForRoute || !mapRef.current || !token) return;
 
