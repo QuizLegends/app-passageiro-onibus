@@ -3,10 +3,6 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-// Dados reais
-import paradas from '../../paradas.json';
-import paradaLinhas from '../../parada_linhas.json';
-
 const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife
 
 const RealMap = forwardRef(({ onSelectStop }, ref) => {
@@ -16,6 +12,10 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
   const userPosRef = useRef(null);
 
   const [userPos, setUserPos] = useState(null);
+  const [paradas, setParadas] = useState([]);
+  const [paradaLinhas, setParadaLinhas] = useState({});
+  const [dadosCarregados, setDadosCarregados] = useState(false);
+
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
   // Botão de GPS exposto para o componente pai
@@ -32,8 +32,31 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     }
   }));
 
+  // Carrega os dados da pasta public
   useEffect(() => {
-    if (!token || mapRef.current || !mapContainerRef.current) return;
+    async function carregarDados() {
+      try {
+        const [resParadas, resLinhas] = await Promise.all([
+          fetch('/paradas.json'),
+          fetch('/parada_linhas.json')
+        ]);
+
+        const dadosParadas = await resParadas.json();
+        const dadosLinhas = await resLinhas.json();
+
+        setParadas(dadosParadas);
+        setParadaLinhas(dadosLinhas);
+        setDadosCarregados(true);
+      } catch (err) {
+        console.error('Erro ao carregar dados das paradas:', err);
+      }
+    }
+
+    carregarDados();
+  }, []);
+
+  useEffect(() => {
+    if (!token || !dadosCarregados || mapRef.current || !mapContainerRef.current) return;
 
     mapboxgl.accessToken = token;
 
@@ -182,11 +205,17 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         mapRef.current = null;
       }
     };
-  }, [token]);
+  }, [token, dadosCarregados, paradas, paradaLinhas]);
 
   return (
     <div className="w-full h-full min-h-full relative bg-slate-200">
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
+      
+      {!dadosCarregados && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-200/80 z-10">
+          <span className="text-purple-900 font-semibold text-sm">Carregando paradas...</span>
+        </div>
+      )}
     </div>
   );
 });
