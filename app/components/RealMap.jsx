@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
-import 'mapbox-gl/dist/mapbox-gl.css'; // Importação do CSS para evitar tela branca
 
 const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife [lng, lat]
 
@@ -57,7 +56,6 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
 
   const [userPos, setUserPos] = useState(null);
   const [nearestStop, setNearestStop] = useState(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
@@ -72,7 +70,12 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
 
   // 1. Inicialização do Mapa
   useEffect(() => {
-    if (!token || !mapContainerRef.current || mapRef.current) return;
+    if (!token) {
+      console.error("Token do Mapbox não encontrado! Certifique-se de definir NEXT_PUBLIC_MAPBOX_TOKEN na Vercel.");
+      return;
+    }
+
+    if (!mapContainerRef.current || mapRef.current) return;
 
     mapboxgl.accessToken = token;
 
@@ -87,34 +90,37 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
     mapRef.current = map;
 
     map.on('load', () => {
-      setMapLoaded(true);
-      map.resize(); // Força o rendimento do mapa no tamanho da tela do celular
+      // Pequeno atraso para garantir o dimensionamento perfeito da tela sem tela branca
+      setTimeout(() => {
+        map.resize();
+      }, 200);
 
-      // Camada para a linha de rota azul
-      map.addSource('route-walking', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          geometry: { type: 'LineString', coordinates: [] }
-        }
-      });
+      if (!map.getSource('route-walking')) {
+        map.addSource('route-walking', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: [] }
+          }
+        });
 
-      map.addLayer({
-        id: 'route-walking-line',
-        type: 'line',
-        source: 'route-walking',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
-        paint: {
-          'line-color': '#2563eb',
-          'line-width': 5,
-          'line-opacity': 0.6,
-          'line-dasharray': [2, 2]
-        }
-      });
+        map.addLayer({
+          id: 'route-walking-line',
+          type: 'line',
+          source: 'route-walking',
+          layout: { 'line-join': 'round', 'line-cap': 'round' },
+          paint: {
+            'line-color': '#2563eb',
+            'line-width': 5,
+            'line-opacity': 0.6,
+            'line-dasharray': [2, 2]
+          }
+        });
+      }
     });
 
     // Captura GPS do Celular
-    if (navigator.geolocation) {
+    if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
           const coords = [pos.coords.longitude, pos.coords.latitude];
@@ -236,7 +242,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
   }, [targetDestination, userPos, token, onNearestStopFound]);
 
   return (
-    <div className="w-full h-full min-h-[300px] relative bg-gray-100">
+    <div className="w-full h-full min-h-full relative bg-slate-200">
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
     </div>
   );
