@@ -5,13 +5,13 @@ export const dynamic = 'force-dynamic';
 import React, { useState } from 'react';
 import dynamicNext from 'next/dynamic';
 import SearchHeader from './components/SearchHeader';
-import { MapPin, Navigation, Bus, Route, Footprints, Clock, Navigation2 } from 'lucide-react';
+import { MapPin, Navigation, Bus, Route, Navigation2 } from 'lucide-react';
 
 const RealMap = dynamicNext(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
-      Carregando Mapa de Paradas...
+      Carregando Paradas no Mapa...
     </div>
   )
 });
@@ -43,12 +43,12 @@ export default function AppHome() {
   return (
     <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-slate-100 font-sans relative overflow-hidden shadow-2xl touch-none">
       
-      {/* CABEÇALHO */}
+      {/* CABEÇALHO DE BUSCA */}
       <header className="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 pt-6 text-white rounded-b-2xl shadow-lg z-20 shrink-0">
         <SearchHeader onSelectDestination={handleSelectDestination} />
       </header>
 
-      {/* MAPA PRINCIPAL */}
+      {/* MAPA */}
       <main className="flex-1 relative w-full overflow-hidden">
         <RealMap 
           triggerRecenter={recenterCount} 
@@ -57,7 +57,7 @@ export default function AppHome() {
           selectedStopForRoute={selectedStopForRoute}
         />
 
-        {/* CARD INFERIOR DINÂMICO */}
+        {/* CARD INFERIOR */}
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 transition-all">
           {activeStop ? (
             <div>
@@ -73,44 +73,37 @@ export default function AppHome() {
                 </div>
               </div>
 
-              {/* LISTA DE HORÁRIOS NA PARADA */}
-              <div className="space-y-1.5 my-3">
-                <div className="flex items-center gap-1 text-[11px] font-bold text-slate-500 mb-1">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Próximas chegadas nesta parada:</span>
-                </div>
-                {activeStop.schedules && activeStop.schedules.map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100">
-                    <span className="text-xs font-bold text-slate-700">{item.line}</span>
-                    <div className="text-right">
-                      <span className="text-xs font-bold text-emerald-600 block">{item.time}</span>
-                      <span className="text-[10px] text-slate-400">em {item.inMin} min</span>
-                    </div>
+              <div className="my-2">
+                <p className="text-xs text-slate-600">{activeStop.address}</p>
+                {activeStop.walkDistance && (
+                  <div className="mt-2 p-2 bg-purple-50 rounded-xl text-xs text-purple-900 font-semibold flex justify-between">
+                    <span>Distância: {activeStop.walkDistance} metros</span>
+                    <span>Tempo a pé: ~{activeStop.walkTime} min</span>
                   </div>
-                ))}
+                )}
               </div>
 
-              {/* BOTÃO PARA SEGUIR ROTA */}
+              {/* BOTÃO SEGUIR ROTA */}
               <button
                 type="button"
                 onClick={handleStartRouteToStop}
-                className="w-full bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+                className="w-full mt-2 bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <Navigation2 className="w-4 h-4" />
-                Seguir rota até esta parada (A pé)
+                Seguir rota a pé até esta parada
               </button>
             </div>
           ) : (
             <div>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Mobilidade Urbana</span>
-              <h2 className="text-base font-bold text-purple-900">Clique em qualquer parada 🚌 no mapa</h2>
-              <p className="text-xs text-slate-600 mt-0.5">Veja os ônibus e horários em tempo real ou pesquise o seu destino acima.</p>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Paradas em Tempo Real</span>
+              <h2 className="text-base font-bold text-purple-900">Paradas da Região</h2>
+              <p className="text-xs text-slate-600 mt-0.5">As paradas oficiais cadastradas no Mapbox aparecem no mapa com o ícone 🚌.</p>
             </div>
           )}
         </div>
       </main>
 
-      {/* BARRA DE NAVEGAÇÃO INFERIOR */}
+      {/* NAVEGAÇÃO INFERIOR */}
       <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
         <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
           <Route className="w-5 h-5" />
