@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Ícone do Usuário (Bolinha Azul)
+// Ícone do Usuário / Passageiro (Bolinha Azul com pulso)
 const userIcon = L.divIcon({
   className: 'custom-user-icon',
   html: `<div style="background-color: #2563eb; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.9); position: relative;">
@@ -31,7 +31,7 @@ const destinationIcon = L.divIcon({
   iconAnchor: [14, 14]
 });
 
-// Fórmula de Haversine para cálculo preciso da distância em metros
+// Cálculo preciso da distância em metros entre dois pontos de GPS (Haversine)
 function getDistanceInMeters(lat1, lon1, lat2, lon2) {
   const R = 6371e3;
   const φ1 = (lat1 * Math.PI) / 180;
@@ -52,6 +52,7 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
   const userPosRef = useRef(null);
   const nearestStopRef = useRef(null);
 
+  // Captura a posição do GPS do passageiro
   useEffect(() => {
     map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
 
@@ -65,22 +66,24 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
     return () => map.off('locationfound', handleLocationFound);
   }, [map, onPosFound]);
 
+  // Recentralizar no Usuário quando clicar no botão da barra inferior
   useEffect(() => {
     if (triggerRecenter > 0 && userPosRef.current) {
-      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.3 });
+      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.5 });
     }
   }, [triggerRecenter, map]);
 
+  // ANIMAÇÃO VER NO MAPA: Foca e dá super zoom na Parada de Embarque ao tocar no card/botão
   useEffect(() => {
     if (focusStopTrigger > 0 && nearestStopRef.current) {
       map.flyTo([nearestStopRef.current.lat, nearestStopRef.current.lon], 18, {
         animate: true,
-        duration: 0.8
+        duration: 1.0
       });
     }
   }, [focusStopTrigger, map]);
 
-  // Localização e cálculo imediato de parada
+  // Calcula a parada de embarque instantaneamente assim que o destino é selecionado
   useEffect(() => {
     if (!targetDestination) return;
 
@@ -91,13 +94,14 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
       [userLat, userLon] = userPosRef.current;
     }
 
+    // Ajusta a câmera do mapa para abranger o passageiro e o destino
     const bounds = L.latLngBounds([
       [userLat, userLon],
       [targetDestination.lat, targetDestination.lon]
     ]);
     map.fitBounds(bounds, { padding: [60, 60] });
 
-    // Gera o ponto da parada de embarque na via mais próxima em direção ao destino
+    // Ponto de parada calculado na direção do percurso
     const stopLat = userLat + (targetDestination.lat - userLat) * 0.08;
     const stopLon = userLon + (targetDestination.lon - userLon) * 0.08;
     const dist = getDistanceInMeters(userLat, userLon, stopLat, stopLon);
@@ -111,8 +115,6 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
     };
 
     nearestStopRef.current = calculatedStop;
-    
-    // Entrega instantânea sem depender de API externa travando
     onNearestStopFound(calculatedStop);
   }, [targetDestination, map, onNearestStopFound]);
 
@@ -150,21 +152,21 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           focusStopTrigger={focusStopTrigger}
         />
 
-        {/* Passageiro */}
+        {/* 1. Passageiro (Bolinha azul) */}
         {userPos && (
           <Marker position={userPos} icon={userIcon}>
             <Popup>Você está aqui</Popup>
           </Marker>
         )}
 
-        {/* Destino */}
+        {/* 2. Destino Selecionado (Pino vermelho) */}
         {targetDestination && (
           <Marker position={[targetDestination.lat, targetDestination.lon]} icon={destinationIcon}>
             <Popup>{targetDestination.name}</Popup>
           </Marker>
         )}
 
-        {/* Parada de Ônibus */}
+        {/* 3. Parada de Embarque (Pino verde de ônibus) */}
         {nearestStop && (
           <Marker position={[nearestStop.lat, nearestStop.lon]} icon={busStopIcon}>
             <Popup>
@@ -174,7 +176,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           </Marker>
         )}
 
-        {/* Rota Pontilhada Azul (Passageiro -> Parada) */}
+        {/* Linha pontilhada azul (Passageiro -> Parada) */}
         {userPos && nearestStop && (
           <Polyline
             positions={[userPos, [nearestStop.lat, nearestStop.lon]]}
@@ -182,7 +184,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           />
         )}
 
-        {/* Rota Verde (Parada -> Destino) */}
+        {/* Linha verde contínua (Parada -> Destino) */}
         {nearestStop && targetDestination && (
           <Polyline
             positions={[[nearestStop.lat, nearestStop.lon], [targetDestination.lat, targetDestination.lon]]}
