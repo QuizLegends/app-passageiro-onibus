@@ -3,39 +3,11 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-const defaultCenter = [-34.918, -8.115]; // [lng, lat] Jaboatão / Recife
+// Dados reais
+import paradas from '../../paradas.json';
+import paradaLinhas from '../../parada_linhas.json';
 
-// Busca paradas próximas usando a API Nativa do Mapbox (Sem bloqueio de CORS/Status 0)
-async function fetchNearbyStopsMapbox(lng, lat, token) {
-  if (!token) return [];
-
-  // Busca POI de transporte público na proximidade das coordenadas atuais
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/parada%20de%20onibus.json?proximity=${lng},${lat}&types=poi&limit=15&access_token=${token}`;
-
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.warn('Mapbox Geocoding retornou status:', res.status);
-      return [];
-    }
-    const data = await res.json();
-
-    if (data && data.features) {
-      return data.features.map(item => ({
-        type: 'Feature',
-        geometry: item.geometry,
-        properties: {
-          id: item.id,
-          name: item.text || 'Parada de Ônibus',
-          address: item.place_name || 'Ponto de transporte público'
-        }
-      }));
-    }
-  } catch (err) {
-    console.error('Erro na busca nativa Mapbox:', err);
-  }
-  return [];
-}
+const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife
 
 const RealMap = forwardRef(({ onSelectStop }, ref) => {
   const mapContainerRef = useRef(null);
@@ -60,20 +32,6 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     }
   }));
 
-  // Carrega as paradas da região central do mapa
-  const loadStopsInView = async (map) => {
-    if (!map) return;
-    const center = map.getCenter();
-    const features = await fetchNearbyStopsMapbox(center.lng, center.lat, token);
-
-    if (map.getSource('bus-stops-source')) {
-      map.getSource('bus-stops-source').setData({
-        type: 'FeatureCollection',
-        features
-      });
-    }
-  };
-
   useEffect(() => {
     if (!token || mapRef.current || !mapContainerRef.current) return;
 
@@ -92,31 +50,50 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // Camada para exibir os ícones das paradas
+      // Transforma as paradas reais em GeoJSON
+      const features = paradas.map((parada) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [parada.lon, parada.lat]
+        },
+        properties: {
+          id: parada.id,
+          code: parada.code,
+          name: parada.name,
+          url: parada.url || ''
+        }
+      }));
+
       map.addSource('bus-stops-source', {
         type: 'geojson',
-        data: { type: 'FeatureCollection', features: [] }
+        data: {
+          type: 'FeatureCollection',
+          features
+        }
       });
 
+      // Círculo verde
       map.addLayer({
         id: 'bus-stops-circle',
         type: 'circle',
         source: 'bus-stops-source',
         paint: {
           'circle-color': '#16a34a',
-          'circle-radius': 12,
+          'circle-radius': 11,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff'
         }
       });
 
+      // Emoji 🚌
       map.addLayer({
         id: 'bus-stops-icon',
         type: 'symbol',
         source: 'bus-stops-source',
         layout: {
           'text-field': '🚌',
-          'text-size': 12,
+          'text-size': 11,
           'text-allow-overlap': true
         }
       });
@@ -127,25 +104,41 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
 
         const feature = e.features[0];
         const coordinates = feature.geometry.coordinates.slice();
-        const properties = feature.properties;
+        const props = feature.properties;
+
+        // Linhas que passam nesta parada
+        const linhas = paradaLinhas[props.id] || [];
+
+        const linhasHtml = linhas.length > 0
+          ? `<div style="margin-top:6px; font-size:11px; color:#334155;">
+               <strong>Linhas:</strong> ${linhas.join(', ')}
+             </div>`
+          : `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">Nenhuma linha encontrada</div>`;
 
         new mapboxgl.Popup({ offset: 15 })
           .setLngLat(coordinates)
           .setHTML(`
-            <div style="font-family: sans-serif; padding: 2px;">
-              <strong style="font-size: 13px; color: #0f172a; display: block;">🚏 ${properties.name}</strong>
-              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">${properties.address}</span>
+            <div style="font-family: sans-serif; padding: 2px; min-width: 140px;">
+              <strong style="font-size: 13px; color: #0f172a; display: block;">
+                🚏 ${props.code}
+              </strong>
+              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">
+                ${props.name}
+              </span>
+              ${linhasHtml}
             </div>
           `)
           .addTo(map);
 
         if (onSelectStop) {
           onSelectStop({
-            id: properties.id,
-            name: properties.name,
-            address: properties.address,
+            id: props.id,
+            code: props.code,
+            name: props.name,
+            address: `Código: ${props.code}`,
             lon: coordinates[0],
-            lat: coordinates[1]
+            lat: coordinates[1],
+            routes: linhas
           });
         }
       });
@@ -156,17 +149,9 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
       map.on('mouseleave', 'bus-stops-circle', () => {
         map.getCanvas().style.cursor = '';
       });
-
-      // Busca inicial
-      loadStopsInView(map);
     });
 
-    // Atualiza paradas ao terminar de mover o mapa
-    map.on('moveend', () => {
-      loadStopsInView(map);
-    });
-
-    // Monitora posição GPS do usuário
+    // GPS do usuário
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -176,7 +161,8 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
 
           if (!userMarkerRef.current) {
             const el = document.createElement('div');
-            el.style.cssText = 'width: 18px; height: 18px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
+            el.style.cssText =
+              'width: 18px; height: 18px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
 
             userMarkerRef.current = new mapboxgl.Marker(el)
               .setLngLat(coords)
