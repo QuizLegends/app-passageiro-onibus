@@ -11,25 +11,22 @@ const RealMap = dynamicNext(() => import('./components/RealMap'), {
   ssr: false,
   loading: () => (
     <div className="w-full h-full flex items-center justify-center bg-slate-200 text-purple-900 font-semibold">
-      Carregando Paradas no Mapa...
+      Carregando Mapa...
     </div>
   )
 });
 
 export default function AppHome() {
-  const [recenterCount, setRecenterCount] = useState(0);
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [activeStop, setActiveStop] = useState(null);
   const [selectedStopForRoute, setSelectedStopForRoute] = useState(null);
-  
-  // Estado para controlar qual botão da barra inferior está ativo (Nenhum por padrão)
   const [activeTab, setActiveTab] = useState(null);
 
   const mapRef = useRef(null);
 
+  // Clique no botão de GPS
   const handleLocationClick = () => {
     setActiveTab('gps');
-    setRecenterCount((prev) => prev + 1);
     if (mapRef.current) {
       mapRef.current.recenter();
     }
@@ -52,7 +49,7 @@ export default function AppHome() {
   return (
     <div className="flex flex-col h-[100dvh] w-full max-w-md mx-auto bg-slate-100 font-sans relative overflow-hidden shadow-2xl touch-none">
       
-      {/* CABEÇALHO DE BUSCA */}
+      {/* CABEÇALHO */}
       <header className="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 pt-6 text-white rounded-b-2xl shadow-lg z-20 shrink-0">
         <SearchHeader onSelectDestination={handleSelectDestination} />
       </header>
@@ -61,7 +58,6 @@ export default function AppHome() {
       <main className="flex-1 relative w-full overflow-hidden">
         <RealMap 
           ref={mapRef}
-          triggerRecenter={recenterCount} 
           targetDestination={selectedDestination}
           onSelectStop={handleSelectStop}
           selectedStopForRoute={selectedStopForRoute}
@@ -85,15 +81,8 @@ export default function AppHome() {
 
               <div className="my-2">
                 <p className="text-xs text-slate-600">{activeStop.address}</p>
-                {activeStop.walkDistance && (
-                  <div className="mt-2 p-2 bg-purple-50 rounded-xl text-xs text-purple-900 font-semibold flex justify-between">
-                    <span>Distância: {activeStop.walkDistance} metros</span>
-                    <span>Tempo a pé: ~{activeStop.walkTime} min</span>
-                  </div>
-                )}
               </div>
 
-              {/* BOTÃO SEGUIR ROTA */}
               <button
                 type="button"
                 onClick={handleStartRouteToStop}
@@ -105,9 +94,9 @@ export default function AppHome() {
             </div>
           ) : (
             <div>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Paradas em Tempo Real</span>
-              <h2 className="text-base font-bold text-purple-900">Paradas da Região</h2>
-              <p className="text-xs text-slate-600 mt-0.5">As paradas oficiais cadastradas no Mapbox aparecem no mapa com o ícone 🚌.</p>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Transporte Público</span>
+              <h2 className="text-base font-bold text-purple-900">Paradas no Mapa</h2>
+              <p className="text-xs text-slate-600 mt-0.5">As paradas reais cadastradas na sua região aparecem com o ícone 🚌 no mapa.</p>
             </div>
           )}
         </div>
@@ -116,7 +105,6 @@ export default function AppHome() {
       {/* NAVEGAÇÃO INFERIOR */}
       <nav className="bg-purple-900 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
         
-        {/* BOTÃO ROTAS */}
         <button 
           onClick={() => setActiveTab('rotas')}
           className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
@@ -127,7 +115,6 @@ export default function AppHome() {
           <span className="text-[10px]">Rotas</span>
         </button>
 
-        {/* BOTÃO PARADAS */}
         <button 
           onClick={() => setActiveTab('paradas')}
           className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
@@ -138,7 +125,6 @@ export default function AppHome() {
           <span className="text-[10px]">Paradas</span>
         </button>
 
-        {/* BOTÃO LINHAS */}
         <button 
           onClick={() => setActiveTab('linhas')}
           className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
@@ -149,7 +135,6 @@ export default function AppHome() {
           <span className="text-[10px]">Linhas</span>
         </button>
         
-        {/* BOTÃO GPS */}
         <button 
           onClick={handleLocationClick}
           className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
