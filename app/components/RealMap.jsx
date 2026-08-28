@@ -15,46 +15,47 @@ const userIcon = L.divIcon({
   iconAnchor: [10, 10]
 });
 
-// Controla as ações de GPS de forma rápida
 function MapController({ triggerRecenter, onPosFound }) {
   const map = useMap();
-  const currentPosRef = useRef(null);
+  const userPosRef = useRef(null);
 
-  // Monitora a localização em tempo real de forma leve
+  // 1. Pega a localização apenas UMA VEZ ao abrir o app para definir o marcador inicial
   useEffect(() => {
-    map.locate({ 
-      setView: true, 
-      maxZoom: 16,
-      watch: true, // Mantém o GPS escutando mudanças sem reatrasar o clique
-      enableHighAccuracy: false // Desativa a busca lenta por altíssima precisão imediata
-    });
-
-    const handleLocationFound = (e) => {
-      const pos = [e.latlng.lat, e.latlng.lng];
-      currentPosRef.current = pos;
-      onPosFound(pos);
-    };
-
-    map.on('locationfound', handleLocationFound);
-
-    return () => {
-      map.off('locationfound', handleLocationFound);
-    };
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = [position.coords.latitude, position.coords.longitude];
+          userPosRef.current = coords;
+          onPosFound(coords);
+          // Move o mapa para o usuário apenas na carga inicial
+          map.setView(coords, 16);
+        },
+        (err) => console.log("Erro ao obter GPS inicial:", err),
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 10000 }
+      );
+    }
   }, [map, onPosFound]);
 
-  // Ao clicar no botão, move instantaneamente para a posição já armazenada
+  // 2. Dispara a centralização RÁPIDA apenas quando você clica no botão
   useEffect(() => {
-    if (triggerRecenter > 0 && currentPosRef.current) {
-      // Animação rápida (0.4s) em vez do voo demorado
-      map.flyTo(currentPosRef.current, 16, { animate: true, duration: 0.4 });
-    } else if (triggerRecenter > 0) {
-      // Caso ainda não tenha a posição gravada, pede via navegador rapidamente
-      navigator.geolocation.getCurrentPosition((pos) => {
-        const coords = [pos.coords.latitude, pos.coords.longitude];
-        currentPosRef.current = coords;
-        onPosFound(coords);
-        map.flyTo(coords, 16, { animate: true, duration: 0.4 });
-      });
+    if (triggerRecenter > 0) {
+      if (userPosRef.current) {
+        // Se já temos a posição salva, move imediatamente em 0.3s
+        map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.3 });
+      }
+
+      // Em segundo plano, atualiza a coordenada para manter o bonequinho no lugar correto
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const coords = [position.coords.latitude, position.coords.longitude];
+            userPosRef.current = coords;
+            onPosFound(coords);
+          },
+          null,
+          { enableHighAccuracy: false }
+        );
+      }
     }
   }, [triggerRecenter, map, onPosFound]);
 
@@ -63,7 +64,7 @@ function MapController({ triggerRecenter, onPosFound }) {
 
 const RealMap = forwardRef(({ triggerRecenter }, ref) => {
   const [userPos, setUserPos] = useState(null);
-  const defaultCenter = [-8.0631, -34.8711]; // Centro padrão RMR (Recife/Jaboatão)
+  const defaultCenter = [-8.0631, -34.8711]; // Recife/Jaboatão
 
   return (
     <div className="w-full h-full relative">
