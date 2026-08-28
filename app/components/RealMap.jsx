@@ -5,55 +5,49 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115]; // [lng, lat] Jaboatão / Recife
 
-// Busca rotas a pé oficiais via Mapbox Directions API
-async function fetchMapboxWalkingRoute(startLon, startLat, endLon, endLat, token) {
+// Busca paradas reais de ônibus via API direta e gratuita do Overpass (OpenStreetMap)
+async function fetchRealStopsFromOverpass(bounds) {
+  const [south, west, north, east] = bounds;
+  
+  // Query Overpass para pegar nós de paradas de ônibus e plataformas de transporte
+  const query = `
+    [out:json][timeout:10];
+    (
+      node["highway"="bus_stop"](${south},${west},${north},${east});
+      node["public_transport"="platform"](${south},${west},${north},${east});
+      node["amenity"="bus_station"](${south},${west},${north},${east});
+    );
+    out body 50;
+  `;
+
   try {
-    const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${startLon},${startLat};${endLon},${endLat}?geometries=geojson&access_token=${token}`;
-    const res = await fetch(url);
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query)
+    });
+    
+    if (!res.ok) return { type: 'FeatureCollection', features: [] };
     const data = await res.json();
 
-    if (data.routes && data.routes.length > 0) {
-      return {
-        geometry: data.routes[0].geometry,
-        distance: Math.round(data.routes[0].distance),
-        duration: Math.round(data.routes[0].duration / 60)
-      };
-    }
-  } catch (err) {
-    console.error('Erro ao buscar rota no Mapbox:', err);
-  }
-  return null;
-}
-
-// Busca paradas reais no banco de dados do Mapbox (Tilequery API)
-async function fetchRealStopsFromMapbox(lng, lat, token) {
-  try {
-    const url = `https://api.mapbox.com/v4/mapbox.mapbox-streets-v8/tilequery/${lng},${lat}.json?radius=1500&limit=50&layers=poi_label&access_token=${token}`;
-    const res = await fetch(url);
-    const data = await res.json();
-
-    if (data && data.features) {
-      const busStops = data.features.filter(f => {
-        const type = f.properties.maki || f.properties.type || '';
-        const name = f.properties.name || '';
-        return type.includes('bus') || type.includes('rail') || name.toLowerCase().includes('parada') || name.toLowerCase().includes('estação');
-      });
-
+    if (data && data.elements) {
       return {
         type: 'FeatureCollection',
-        features: busStops.map(stop => ({
+        features: data.elements.map(el => ({
           type: 'Feature',
-          geometry: stop.geometry,
+          geometry: {
+            type: 'Point',
+            coordinates: [el.lon, el.lat]
+          },
           properties: {
-            id: stop.id || Math.random().toString(),
-            name: stop.properties.name || 'Parada de Ônibus',
-            address: stop.properties.address || 'Parada de transporte público'
+            id: el.id.toString(),
+            name: el.tags?.name || el.tags?.description || 'Parada de Ônibus',
+            address: el.tags?.['addr:street'] ? `Rua: ${el.tags['addr:street']}` : 'Parada de transporte público'
           }
         }))
       };
     }
   } catch (err) {
-    console.error('Erro ao buscar paradas reais via Mapbox:', err);
+    console.error('Erro ao buscar paradas no Overpass:', err);
   }
   return { type: 'FeatureCollection', features: [] };
 }
@@ -67,7 +61,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Recentralizar ÚNICA E EXCLUSIVAMENTE quando o usuário clica no botão GPS
+  // Recentraliza no GPS somente ao clicar no botão
   useImperativeHandle(ref, () => ({
     recenter: () => {
       if (mapRef.current && userPos) {
@@ -76,10 +70,13 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
     }
   }));
 
-  // Atualiza as paradas nativamente na camada GeoJSON
-  const loadStopsGeoJSON = async (map, lng, lat) => {
-    if (!token) return;
-    const geojson = await fetchRealStopsFromMapbox(lng, lat, token);
+  // Atualiza as paradas buscando do Overpass de acordo com o limite visível do mapa
+  const updateStops = async (map) => {
+    if (!map) return;
+    const b = map.getBounds();
+    const boundsArray = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()];
+    
+    const geojson = await fetchRealStopsFromOverpass(boundsArray);
 
     if (map.getSource('bus-stops-source')) {
       map.getSource('bus-stops-source').setData(geojson);
@@ -104,7 +101,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // Fonte e camada para as paradas (Nativa e Fixa no Solo)
+      // Camada nativa das paradas (Fixas no solo do mapa)
       map.addSource('bus-stops-source', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -116,7 +113,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         source: 'bus-stops-source',
         paint: {
           'circle-color': '#16a34a',
-          'circle-radius': 14,
+          'circle-radius': 13,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff'
         }
@@ -128,7 +125,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         source: 'bus-stops-source',
         layout: {
           'text-field': '🚌',
-          'text-size': 14,
+          'text-size': 13,
           'text-allow-overlap': true
         }
       });
@@ -169,34 +166,16 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
         map.getCanvas().style.cursor = '';
       });
 
-      // Camada para a rota
-      if (!map.getSource('route-walking')) {
-        map.addSource('route-walking', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            geometry: { type: 'LineString', coordinates: [] }
-          }
-        });
-
-        map.addLayer({
-          id: 'route-walking-line',
-          type: 'line',
-          source: 'route-walking',
-          layout: { 'line-join': 'round', 'line-cap': 'round' },
-          paint: {
-            'line-color': '#2563eb',
-            'line-width': 5,
-            'line-opacity': 0.8,
-            'line-dasharray': [2, 2]
-          }
-        });
-      }
-
-      loadStopsGeoJSON(map, defaultCenter[0], defaultCenter[1]);
+      // Carrega as paradas da área visível assim que o mapa carrega
+      updateStops(map);
     });
 
-    // Apenas armazena a coordenada do usuário e posiciona a bolinha azul SEM mover a câmera do mapa
+    // Quando o usuário terminar de mover/arrastar o mapa, carrega as paradas da nova área
+    map.on('moveend', () => {
+      updateStops(map);
+    });
+
+    // Pega GPS e coloca marcador azul SEM puxar ou mexer a câmera do mapa
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -205,7 +184,7 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
 
           if (!userMarkerRef.current) {
             const el = document.createElement('div');
-            el.style.cssText = 'width: 20px; height: 20px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
+            el.style.cssText = 'width: 18px; height: 18px; background-color: #2563eb; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(37,99,235,0.8);';
 
             userMarkerRef.current = new mapboxgl.Marker(el)
               .setLngLat(coords)
@@ -226,43 +205,6 @@ const RealMap = forwardRef(({ triggerRecenter, onSelectStop, selectedStopForRout
       }
     };
   }, [token]);
-
-  // Evento do botão manual de GPS
-  useEffect(() => {
-    if (triggerRecenter > 0 && mapRef.current) {
-      const posToUse = userPos || defaultCenter;
-      mapRef.current.flyTo({ center: posToUse, zoom: 16, essential: true });
-    }
-  }, [triggerRecenter, userPos]);
-
-  // Traçar Rota a Pé
-  useEffect(() => {
-    if (!selectedStopForRoute || !mapRef.current || !token) return;
-
-    const map = mapRef.current;
-    const startCoords = userPos || defaultCenter;
-
-    async function drawRoute() {
-      const routeData = await fetchMapboxWalkingRoute(
-        startCoords[0], startCoords[1],
-        selectedStopForRoute.lon, selectedStopForRoute.lat,
-        token
-      );
-
-      if (routeData && map.getSource('route-walking')) {
-        map.getSource('route-walking').setData({
-          type: 'Feature',
-          geometry: routeData.geometry
-        });
-
-        if (onSelectStop) {
-          onSelectStop(prev => prev ? { ...prev, walkDistance: routeData.distance, walkTime: routeData.duration } : null);
-        }
-      }
-    }
-
-    drawRoute();
-  }, [selectedStopForRoute, userPos, token]);
 
   return (
     <div className="w-full h-full min-h-full relative bg-slate-200">
