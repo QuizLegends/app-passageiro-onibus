@@ -24,7 +24,6 @@ export default function AppHome() {
 
   const mapRef = useRef(null);
 
-  // Clique no botão de GPS
   const handleLocationClick = () => {
     setActiveTab('gps');
     if (mapRef.current) {
@@ -67,26 +66,61 @@ export default function AppHome() {
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 transition-all">
           {activeStop ? (
             <div>
+              {/* Cabeçalho da parada */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
                 <div className="flex items-center gap-2">
                   <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
                     <Bus className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Parada Selecionada</span>
-                    <h2 className="text-sm font-bold text-slate-800 truncate">{activeStop.name}</h2>
+                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                      Parada Selecionada
+                    </span>
+                    <h2 className="text-sm font-bold text-slate-800 truncate">
+                      {activeStop.code || activeStop.name}
+                    </h2>
                   </div>
                 </div>
               </div>
 
-              <div className="my-2">
-                <p className="text-xs text-slate-600">{activeStop.address}</p>
+              {/* Código e nome */}
+              <div className="mb-2">
+                <p className="text-xs text-slate-500">
+                  Código: <span className="font-semibold text-slate-700">{activeStop.code}</span>
+                </p>
+                {activeStop.name && (
+                  <p className="text-xs text-slate-600 mt-0.5">{activeStop.name}</p>
+                )}
               </div>
 
+              {/* Linhas que passam na parada */}
+              {activeStop.routes && activeStop.routes.length > 0 ? (
+                <div className="mb-3">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Linhas nesta parada
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeStop.routes.map((linha) => (
+                      <span
+                        key={linha}
+                        className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200"
+                      >
+                        {linha}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-slate-400 mb-3">
+                  Nenhuma linha encontrada para esta parada.
+                </p>
+              )}
+
+              {/* Botão de rota a pé */}
               <button
                 type="button"
                 onClick={handleStartRouteToStop}
-                className="w-full mt-2 bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+                className="w-full bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
               >
                 <Navigation2 className="w-4 h-4" />
                 Seguir rota a pé até esta parada
@@ -94,9 +128,13 @@ export default function AppHome() {
             </div>
           ) : (
             <div>
-              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Transporte Público</span>
+              <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                Transporte Público
+              </span>
               <h2 className="text-base font-bold text-purple-900">Paradas no Mapa</h2>
-              <p className="text-xs text-slate-600 mt-0.5">As paradas reais cadastradas na sua região aparecem com o ícone 🚌 no mapa.</p>
+              <p className="text-xs text-slate-600 mt-0.5">
+                As paradas oficiais do Grande Recife aparecem com o ícone 🚌 no mapa.
+              </p>
             </div>
           )}
         </div>
