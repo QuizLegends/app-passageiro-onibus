@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import dynamicNext from 'next/dynamic';
 import SearchHeader from './components/SearchHeader';
 import { MapPin, Navigation, Bus, Route, Navigation2 } from 'lucide-react';
@@ -21,9 +21,18 @@ export default function AppHome() {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [activeStop, setActiveStop] = useState(null);
   const [selectedStopForRoute, setSelectedStopForRoute] = useState(null);
+  
+  // Estado para controlar qual botão da barra inferior está ativo (Nenhum por padrão)
+  const [activeTab, setActiveTab] = useState(null);
+
+  const mapRef = useRef(null);
 
   const handleLocationClick = () => {
+    setActiveTab('gps');
     setRecenterCount((prev) => prev + 1);
+    if (mapRef.current) {
+      mapRef.current.recenter();
+    }
   };
 
   const handleSelectDestination = (dest) => {
@@ -51,6 +60,7 @@ export default function AppHome() {
       {/* MAPA */}
       <main className="flex-1 relative w-full overflow-hidden">
         <RealMap 
+          ref={mapRef}
           triggerRecenter={recenterCount} 
           targetDestination={selectedDestination}
           onSelectStop={handleSelectStop}
@@ -104,27 +114,52 @@ export default function AppHome() {
       </main>
 
       {/* NAVEGAÇÃO INFERIOR */}
-      <nav className="bg-purple-800 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
-        <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
+      <nav className="bg-purple-900 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
+        
+        {/* BOTÃO ROTAS */}
+        <button 
+          onClick={() => setActiveTab('rotas')}
+          className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
+            activeTab === 'rotas' ? 'text-white bg-purple-800 font-bold' : 'text-purple-300 hover:text-white'
+          }`}
+        >
           <Route className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Rotas</span>
+          <span className="text-[10px]">Rotas</span>
         </button>
-        <button className="flex flex-col items-center gap-1 text-white font-bold">
-          <MapPin className="w-5 h-5 text-emerald-400" />
-          <span className="text-[10px] text-emerald-400">Paradas</span>
+
+        {/* BOTÃO PARADAS */}
+        <button 
+          onClick={() => setActiveTab('paradas')}
+          className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
+            activeTab === 'paradas' ? 'text-emerald-400 bg-purple-800 font-bold' : 'text-purple-300 hover:text-white'
+          }`}
+        >
+          <MapPin className="w-5 h-5" />
+          <span className="text-[10px]">Paradas</span>
         </button>
-        <button className="flex flex-col items-center gap-1 hover:text-white transition-colors">
+
+        {/* BOTÃO LINHAS */}
+        <button 
+          onClick={() => setActiveTab('linhas')}
+          className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
+            activeTab === 'linhas' ? 'text-white bg-purple-800 font-bold' : 'text-purple-300 hover:text-white'
+          }`}
+        >
           <Bus className="w-5 h-5" />
-          <span className="text-[10px] font-medium">Linhas</span>
+          <span className="text-[10px]">Linhas</span>
         </button>
         
+        {/* BOTÃO GPS */}
         <button 
           onClick={handleLocationClick}
-          className="flex flex-col items-center gap-1 text-white bg-purple-700/50 px-2 py-0.5 rounded-lg active:scale-95 transition-transform"
+          className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
+            activeTab === 'gps' ? 'text-cyan-300 bg-purple-800 font-bold' : 'text-purple-300 hover:text-white'
+          }`}
         >
-          <Navigation className="w-5 h-5 text-cyan-300" />
-          <span className="text-[10px] font-bold text-cyan-300">GPS</span>
+          <Navigation className="w-5 h-5" />
+          <span className="text-[10px]">GPS</span>
         </button>
+
       </nav>
 
     </div>
