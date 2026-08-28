@@ -1,201 +1,111 @@
 'use client';
 
-import { useEffect, useState, useRef, forwardRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState } from 'react';
+import { Search, MapPin, X } from 'lucide-react';
 
-// Ícone do Usuário / Passageiro (Bolinha Azul com pulso)
-const userIcon = L.divIcon({
-  className: 'custom-user-icon',
-  html: `<div style="background-color: #2563eb; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.9); position: relative;">
-          <div style="position: absolute; top: -5px; left: -5px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #2563eb; animation: ping 1.5s infinite; opacity: 0.7;"></div>
-         </div>`,
-  iconSize: [22, 22],
-  iconAnchor: [11, 11]
-});
+export default function SearchHeader({ onSelectDestination }) {
+  const [query, setQuery] = useState('');
+  const [results, setResults] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-// Ícone da Parada de Ônibus (Verde)
-const busStopIcon = L.divIcon({
-  className: 'custom-bus-stop-icon',
-  html: `<div style="background-color: #16a34a; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">🚌</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
+  // Exemplo de locais populares em Recife e Jaboatão dos Guararapes para busca rápida
+  const defaultLocations = [
+    { name: 'Marco Zero, Recife Antigo', lat: -8.0631, lon: -34.8711 },
+    { name: 'Shopping Recife, Boa Viagem', lat: -8.1192, lon: -34.9048 },
+    { name: 'Shopping Guararapes, Piedade (Jaboatão)', lat: -8.1672, lon: -35.0003 },
+    { name: 'Estação Central do Recife (Metrô)', lat: -8.0668, lon: -34.8837 },
+    { name: 'TI Joana Bezerra', lat: -8.0706, lon: -34.8953 },
+    { name: 'TI Jaboatão', lat: -8.1118, lon: -35.0152 }
+  ];
 
-// Ícone do Destino (Vermelho)
-const destinationIcon = L.divIcon({
-  className: 'custom-dest-icon',
-  html: `<div style="background-color: #dc2626; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">📍</div>`,
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-});
+  const handleSearch = (text) => {
+    setQuery(text);
 
-// Cálculo preciso da distância em metros entre dois pontos de GPS (Haversine)
-function getDistanceInMeters(lat1, lon1, lat2, lon2) {
-  const R = 6371e3;
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
-
-  const a =
-    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-  return Math.round(R * c);
-}
-
-function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger }) {
-  const map = useMap();
-  const userPosRef = useRef(null);
-  const nearestStopRef = useRef(null);
-
-  // Captura a posição do GPS do passageiro
-  useEffect(() => {
-    map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
-
-    const handleLocationFound = (e) => {
-      const pos = [e.latlng.lat, e.latlng.lng];
-      userPosRef.current = pos;
-      onPosFound(pos);
-    };
-
-    map.on('locationfound', handleLocationFound);
-    return () => map.off('locationfound', handleLocationFound);
-  }, [map, onPosFound]);
-
-  // Recentralizar no Usuário quando clicar no botão da barra inferior
-  useEffect(() => {
-    if (triggerRecenter > 0 && userPosRef.current) {
-      map.flyTo(userPosRef.current, 16, { animate: true, duration: 0.5 });
-    }
-  }, [triggerRecenter, map]);
-
-  // ANIMAÇÃO VER NO MAPA: Foca e dá super zoom na Parada de Embarque ao tocar no card/botão
-  useEffect(() => {
-    if (focusStopTrigger > 0 && nearestStopRef.current) {
-      map.flyTo([nearestStopRef.current.lat, nearestStopRef.current.lon], 18, {
-        animate: true,
-        duration: 1.0
-      });
-    }
-  }, [focusStopTrigger, map]);
-
-  // Calcula a parada de embarque instantaneamente assim que o destino é selecionado
-  useEffect(() => {
-    if (!targetDestination) return;
-
-    let userLat = -8.0631;
-    let userLon = -34.8711;
-
-    if (userPosRef.current) {
-      [userLat, userLon] = userPosRef.current;
+    if (text.trim().length < 2) {
+      setResults([]);
+      return;
     }
 
-    // Ajusta a câmera do mapa para abranger o passageiro e o destino
-    const bounds = L.latLngBounds([
-      [userLat, userLon],
-      [targetDestination.lat, targetDestination.lon]
-    ]);
-    map.fitBounds(bounds, { padding: [60, 60] });
+    setIsLoading(true);
 
-    // Ponto de parada calculado na direção do percurso
-    const stopLat = userLat + (targetDestination.lat - userLat) * 0.08;
-    const stopLon = userLon + (targetDestination.lon - userLon) * 0.08;
-    const dist = getDistanceInMeters(userLat, userLon, stopLat, stopLon);
+    // Filtra localmente os locais correspondentes ao texto digitado
+    const filtered = defaultLocations.filter((item) =>
+      item.name.toLowerCase().includes(text.toLowerCase())
+    );
 
-    const calculatedStop = {
-      id: 'nearest_stop_main',
-      name: 'Parada de Embarque Próxima',
-      lat: stopLat,
-      lon: stopLon,
-      distance: dist > 50 ? dist : 120
-    };
+    setResults(filtered);
+    setIsLoading(false);
+  };
 
-    nearestStopRef.current = calculatedStop;
-    onNearestStopFound(calculatedStop);
-  }, [targetDestination, map, onNearestStopFound]);
+  const handleSelect = (item) => {
+    setQuery(item.name);
+    setResults([]);
+    if (onSelectDestination) {
+      onSelectDestination(item);
+    }
+  };
 
-  return null;
-}
-
-const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopFound, focusStopTrigger }, ref) => {
-  const [userPos, setUserPos] = useState(null);
-  const [nearestStop, setNearestStop] = useState(null);
-  const defaultCenter = [-8.0631, -34.8711];
-
-  const handleStopFound = (stop) => {
-    setNearestStop(stop);
-    if (onNearestStopFound) onNearestStopFound(stop);
+  const handleClear = () => {
+    setQuery('');
+    setResults([]);
+    if (onSelectDestination) {
+      onSelectDestination(null);
+    }
   };
 
   return (
-    <div className="w-full h-full relative">
-      <MapContainer 
-        center={defaultCenter} 
-        zoom={14} 
-        zoomControl={false}
-        className="w-full h-full z-0"
-      >
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+    <div className="relative w-full">
+      {/* Campo de Busca */}
+      <div className="relative flex items-center">
+        <Search className="absolute left-3 w-5 h-5 text-purple-300 pointer-events-none" />
         
-        <MapController 
-          triggerRecenter={triggerRecenter} 
-          onPosFound={setUserPos} 
-          targetDestination={targetDestination}
-          onNearestStopFound={handleStopFound}
-          focusStopTrigger={focusStopTrigger}
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Para onde você vai hoje?"
+          className="w-full bg-purple-950/60 text-white placeholder-purple-300 text-sm font-medium rounded-2xl pl-10 pr-10 py-3 outline-none border border-purple-700/50 focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/30 transition-all shadow-inner"
         />
 
-        {/* 1. Passageiro (Bolinha azul) */}
-        {userPos && (
-          <Marker position={userPos} icon={userIcon}>
-            <Popup>Você está aqui</Popup>
-          </Marker>
+        {query && (
+          <button
+            type="button"
+            onClick={handleClear}
+            className="absolute right-3 text-purple-300 hover:text-white p-1 rounded-full transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
         )}
+      </div>
 
-        {/* 2. Destino Selecionado (Pino vermelho) */}
-        {targetDestination && (
-          <Marker position={[targetDestination.lat, targetDestination.lon]} icon={destinationIcon}>
-            <Popup>{targetDestination.name}</Popup>
-          </Marker>
-        )}
-
-        {/* 3. Parada de Embarque (Pino verde de ônibus) */}
-        {nearestStop && (
-          <Marker position={[nearestStop.lat, nearestStop.lon]} icon={busStopIcon}>
-            <Popup>
-              <strong>{nearestStop.name}</strong><br />
-              A {nearestStop.distance}m (~{Math.ceil(nearestStop.distance / 80)} min a pé)
-            </Popup>
-          </Marker>
-        )}
-
-        {/* Linha pontilhada azul (Passageiro -> Parada) */}
-        {userPos && nearestStop && (
-          <Polyline
-            positions={[userPos, [nearestStop.lat, nearestStop.lon]]}
-            pathOptions={{ color: '#2563eb', dashArray: '6, 8', weight: 4 }}
-          />
-        )}
-
-        {/* Linha verde contínua (Parada -> Destino) */}
-        {nearestStop && targetDestination && (
-          <Polyline
-            positions={[[nearestStop.lat, nearestStop.lon], [targetDestination.lat, targetDestination.lon]]}
-            pathOptions={{ color: '#16a34a', weight: 4 }}
-          />
-        )}
-      </MapContainer>
+      {/* Lista Suspensa de Sugestões / Resultados */}
+      {results.length > 0 && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <ul className="max-h-60 overflow-y-auto divide-y divide-slate-100">
+            {results.map((item, index) => (
+              <li key={index}>
+                <button
+                  type="button"
+                  onClick={() => handleSelect(item)}
+                  className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-purple-50 active:bg-purple-100 transition-colors"
+                >
+                  <div className="p-2 bg-purple-100 text-purple-700 rounded-xl shrink-0">
+                    <MapPin className="w-4 h-4" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-xs font-semibold text-slate-800 truncate">
+                      {item.name}
+                    </span>
+                    <span className="text-[10px] text-slate-500">
+                      Pernambuco
+                    </span>
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
-});
-
-RealMap.displayName = 'RealMap';
-
-export default RealMap;
+}
