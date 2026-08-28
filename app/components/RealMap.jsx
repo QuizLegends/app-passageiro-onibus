@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, forwardRef } from 'react';
+import { useEffect, useState, useRef, forwardRef, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -24,14 +24,17 @@ function getDistanceInMeters(lat1, lon1, lat2, lon2) {
 function MapController({ triggerRecenter, onPosFound, targetDestination, onNearestStopFound, focusStopTrigger, nearestStop }) {
   const map = useMap();
   const userPosRef = useRef(null);
-  const hasFittedBoundsRef = useRef(false);
+  const lastDestinationIdRef = useRef(null);
 
-  // Captura a posição do GPS do passageiro
+  // Captura a posição do GPS do passageiro apenas para obter o ponto inicial (sem forçar a câmera o tempo todo)
   useEffect(() => {
-    map.locate({ setView: true, maxZoom: 16, enableHighAccuracy: true });
+    map.locate({ enableHighAccuracy: true });
 
     const handleLocationFound = (e) => {
       const pos = [e.latlng.lat, e.latlng.lng];
+      if (!userPosRef.current) {
+        map.setView(pos, 15);
+      }
       userPosRef.current = pos;
       onPosFound(pos);
     };
@@ -47,22 +50,29 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
     }
   }, [triggerRecenter, map]);
 
-  // ANIMAÇÃO VER NO MAPA: Foca e dá super zoom na Parada de Embarque ao tocar no card/botão
+  // ANIMAÇÃO VER NO MAPA: Foca suavemente na Parada de Embarque ao tocar no card/botão
   useEffect(() => {
     if (focusStopTrigger > 0 && nearestStop) {
       map.flyTo([nearestStop.lat, nearestStop.lon], 18, {
         animate: true,
-        duration: 1.2
+        duration: 1
       });
     }
   }, [focusStopTrigger, nearestStop, map]);
 
-  // Calcula a parada de embarque e ajusta os limites UMA ÚNICA VEZ por destino
+  // Calcula a parada de embarque e ajusta a visão APENAS quando o destino REALMENTE mudar
   useEffect(() => {
     if (!targetDestination) {
-      hasFittedBoundsRef.current = false;
+      lastDestinationIdRef.current = null;
       return;
     }
+
+    const currentDestId = `${targetDestination.lat}-${targetDestination.lon}`;
+    
+    // Evita recalcular e mover a câmera se for o mesmo destino já processado
+    if (lastDestinationIdRef.current === currentDestId) return;
+
+    lastDestinationIdRef.current = currentDestId;
 
     let userLat = -8.0631;
     let userLon = -34.8711;
@@ -71,15 +81,12 @@ function MapController({ triggerRecenter, onPosFound, targetDestination, onNeare
       [userLat, userLon] = userPosRef.current;
     }
 
-    // Ajusta o enquadramento apenas na primeira seleção do destino
-    if (!hasFittedBoundsRef.current) {
-      const bounds = L.latLngBounds([
-        [userLat, userLon],
-        [targetDestination.lat, targetDestination.lon]
-      ]);
-      map.fitBounds(bounds, { padding: [60, 60] });
-      hasFittedBoundsRef.current = true;
-    }
+    // Ajusta o enquadramento suavemente para mostrar origem e destino
+    const bounds = L.latLngBounds([
+      [userLat, userLon],
+      [targetDestination.lat, targetDestination.lon]
+    ]);
+    map.fitBounds(bounds, { padding: [50, 50] });
 
     // Ponto de parada calculado na direção do percurso
     const stopLat = userLat + (targetDestination.lat - userLat) * 0.08;
@@ -106,38 +113,41 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
   const [icons, setIcons] = useState(null);
   const defaultCenter = [-8.0631, -34.8711];
 
-  // Cria os ícones do Leaflet apenas no navegador (Client-Side)
+  // Callback estável para não disparar re-renders desnecessários
+  const handleStopFound = useCallback((stop) => {
+    setNearestStop(stop);
+    if (onNearestStopFound) onNearestStopFound(stop);
+  }, [onNearestStopFound]);
+
+  const handlePosFound = useCallback((pos) => {
+    setUserPos(pos);
+  }, []);
+
+  // Cria os ícones do Leaflet ancorados corretamente
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIcons({
         userIcon: L.divIcon({
-          className: 'custom-user-icon',
-          html: `<div style="background-color: #2563eb; width: 22px; height: 22px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 14px rgba(37,99,235,0.9); position: relative;">
-                  <div style="position: absolute; top: -5px; left: -5px; width: 26px; height: 26px; border-radius: 50%; border: 2px solid #2563eb; animation: ping 1.5s infinite; opacity: 0.7;"></div>
-                 </div>`,
-          iconSize: [22, 22],
-          iconAnchor: [11, 11]
+          className: '',
+          html: `<div style="background-color: #2563eb; width: 20px; height: 20px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(37,99,235,0.8); position: relative;"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10]
         }),
         busStopIcon: L.divIcon({
-          className: 'custom-bus-stop-icon',
-          html: `<div style="background-color: #16a34a; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">🚌</div>`,
-          iconSize: [28, 28],
-          iconAnchor: [14, 14]
+          className: '',
+          html: `<div style="background-color: #16a34a; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 14px; color: white;">🚌</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
         }),
         destinationIcon: L.divIcon({
-          className: 'custom-dest-icon',
-          html: `<div style="background-color: #dc2626; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 10px rgba(0,0,0,0.4); font-size: 14px; color: white;">📍</div>`,
-          iconSize: [28, 28],
-          iconAnchor: [14, 14]
+          className: '',
+          html: `<div style="background-color: #dc2626; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); font-size: 14px; color: white;">📍</div>`,
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
         })
       });
     }
   }, []);
-
-  const handleStopFound = (stop) => {
-    setNearestStop(stop);
-    if (onNearestStopFound) onNearestStopFound(stop);
-  };
 
   if (!icons) return null;
 
@@ -156,14 +166,14 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
         
         <MapController 
           triggerRecenter={triggerRecenter} 
-          onPosFound={setUserPos} 
+          onPosFound={handlePosFound} 
           targetDestination={targetDestination}
           onNearestStopFound={handleStopFound}
           focusStopTrigger={focusStopTrigger}
           nearestStop={nearestStop}
         />
 
-        {/* 1. Passageiro (Bolinha azul) */}
+        {/* 1. Passageiro (Ponto azul) */}
         {userPos && (
           <Marker position={userPos} icon={icons.userIcon}>
             <Popup>Você está aqui</Popup>
@@ -177,7 +187,7 @@ const RealMap = forwardRef(({ triggerRecenter, targetDestination, onNearestStopF
           </Marker>
         )}
 
-        {/* 3. Parada de Embarque (Pino verde de ônibus) */}
+        {/* 3. Parada de Embarque (Pino verde) */}
         {nearestStop && (
           <Marker position={[nearestStop.lat, nearestStop.lon]} icon={icons.busStopIcon}>
             <Popup>
