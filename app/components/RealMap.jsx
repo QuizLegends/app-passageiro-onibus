@@ -3,34 +3,65 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-const defaultCenter = [-34.918, -8.115]; // [lng, lat] Jaboatão / Recife
+const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife
 
-// Busca paradas reais com rota e dados do OpenStreetMap sem cair no bloqueio de limite
+// Servidores públicos do Overpass para Fallback (se um falhar/bloquear, tenta o outro)
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+];
+
 async function fetchStopsDirect(south, west, north, east) {
-  const overpassUrl = `https://overpass-api.de/api/interpreter?data=[out:json][timeout:15];node["highway"="bus_stop"](${south},${west},${north},${east});out%20body%2060;`;
+  const query = `
+    [out:json][timeout:25];
+    (
+      node["highway"="bus_stop"](${south},${west},${north},${east});
+      node["public_transport"="platform"]["bus"!="no"](${south},${west},${north},${east});
+    );
+    out body;
+  `;
 
-  try {
-    const res = await fetch(overpassUrl);
-    if (!res.ok) return [];
-    const data = await res.json();
+  const encodedQuery = encodeURIComponent(query);
 
-    if (data && data.elements) {
-      return data.elements.map(el => ({
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [el.lon, el.lat]
-        },
-        properties: {
-          id: el.id.toString(),
-          name: el.tags?.name || el.tags?.description || 'Parada de Ônibus',
-          address: el.tags?.['addr:street'] ? `Rua ${el.tags['addr:street']}` : 'Ponto de Ônibus'
-        }
-      }));
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    try {
+      const res = await fetch(`${endpoint}?data=${encodedQuery}`);
+      if (!res.ok) {
+        console.warn(`[Overpass Warning] Servidor ${endpoint} respondeu com status ${res.status}`);
+        continue; // Tenta o próximo servidor da lista
+      }
+
+      const data = await res.json();
+      console.log(`[Overpass Success] Retornou ${data.elements?.length ?? 0} elementos via ${endpoint}`);
+
+      if (data?.elements) {
+        const seen = new Set();
+        return data.elements
+          .filter(el => {
+            if (seen.has(el.id)) return false;
+            seen.add(el.id);
+            return true;
+          })
+          .map(el => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Point',
+              coordinates: [el.lon, el.lat]
+            },
+            properties: {
+              id: el.id.toString(),
+              name: el.tags?.name || el.tags?.description || 'Parada de Ônibus',
+              address: el.tags?.['addr:street'] ? `Rua ${el.tags['addr:street']}` : 'Ponto de Ônibus'
+            }
+          }));
+      }
+    } catch (err) {
+      console.error(`[Overpass Error] Falha ao conectar em ${endpoint}:`, err);
     }
-  } catch (err) {
-    console.error('Erro na busca de paradas:', err);
   }
+
+  console.error('[Overpass Error] Todos os servidores de Overpass falharam ou timeout.');
   return [];
 }
 
@@ -39,12 +70,13 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
   const userPosRef = useRef(null);
+  const debounceTimerRef = useRef(null);
 
   const [userPos, setUserPos] = useState(null);
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Função disparada manualmente pelo botão GPS
+  // Método exposto para recentralização via botão de GPS
   useImperativeHandle(ref, () => ({
     recenter: () => {
       const currentPos = userPosRef.current || userPos;
@@ -58,23 +90,27 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
     }
   }));
 
-  // Carrega paradas na área visível
-  const loadStopsInView = async (map) => {
+  // Função para buscar paradas com controle de debounce
+  const loadStopsInView = (map) => {
     if (!map) return;
-    const bounds = map.getBounds();
-    const features = await fetchStopsDirect(
-      bounds.getSouth(),
-      bounds.getWest(),
-      bounds.getNorth(),
-      bounds.getEast()
-    );
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
 
-    if (map.getSource('bus-stops-source')) {
-      map.getSource('bus-stops-source').setData({
-        type: 'FeatureCollection',
-        features
-      });
-    }
+    debounceTimerRef.current = setTimeout(async () => {
+      const bounds = map.getBounds();
+      const features = await fetchStopsDirect(
+        bounds.getSouth(),
+        bounds.getWest(),
+        bounds.getNorth(),
+        bounds.getEast()
+      );
+
+      if (map.getSource('bus-stops-source')) {
+        map.getSource('bus-stops-source').setData({
+          type: 'FeatureCollection',
+          features
+        });
+      }
+    }, 600); // Aguarda 600ms após o término da movimentação
   };
 
   useEffect(() => {
@@ -95,7 +131,6 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // Camada para paradas (Ícones fixos na camada nativa GeoJSON)
       map.addSource('bus-stops-source', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -107,7 +142,7 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
         source: 'bus-stops-source',
         paint: {
           'circle-color': '#16a34a',
-          'circle-radius': 13,
+          'circle-radius': 12,
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff'
         }
@@ -119,12 +154,11 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
         source: 'bus-stops-source',
         layout: {
           'text-field': '🚌',
-          'text-size': 13,
+          'text-size': 12,
           'text-allow-overlap': true
         }
       });
 
-      // Clique em uma parada
       map.on('click', 'bus-stops-circle', (e) => {
         if (!e.features || e.features.length === 0) return;
 
@@ -160,16 +194,13 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
         map.getCanvas().style.cursor = '';
       });
 
-      // Busca inicial de paradas
       loadStopsInView(map);
     });
 
-    // Quando o usuário termina de arrastar o mapa, recarrega as paradas daquela área
     map.on('moveend', () => {
       loadStopsInView(map);
     });
 
-    // Acompanha a localização GPS real sem forçar a movimentação da tela
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -188,12 +219,13 @@ const RealMap = forwardRef(({ onSelectStop, selectedStopForRoute }, ref) => {
             userMarkerRef.current.setLngLat(coords);
           }
         },
-        (err) => console.warn('GPS Warning:', err.message),
+        (err) => console.warn('[GPS Warning]:', err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
 
     return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
