@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115];
 
-const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRoute }, ref) => {
+const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, selectedStopForRoute }, ref) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
@@ -136,7 +136,7 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
         }
       });
 
-      // Fonte para a rota a pé
+      // Fonte da rota a pé
       map.addSource('route', {
         type: 'geojson',
         data: { type: 'FeatureCollection', features: [] }
@@ -157,7 +157,7 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
         }
       });
 
-      // Clique na parada
+      // Clique na parada do mapa
       map.on('click', 'bus-stops-circle', (e) => {
         if (!e.features || e.features.length === 0) return;
 
@@ -242,38 +242,45 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
     };
   }, [status, token, paradas, paradaLinhas, linhasMap, horarios]);
 
-  // Quando seleciona um lugar ou parada na pesquisa → voa até lá
+  // Quando seleciona um LUGAR na pesquisa → voa até lá
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || !targetDestination) return;
+    if (!targetDestination.lon || !targetDestination.lat) return;
 
-    const dest = targetDestination || (selectedStopForRoute ? null : null);
-    
-    // Prioridade: destino da pesquisa
-    if (targetDestination && targetDestination.lon && targetDestination.lat) {
-      const coords = [targetDestination.lon, targetDestination.lat];
+    const coords = [targetDestination.lon, targetDestination.lat];
 
-      mapRef.current.flyTo({
-        center: coords,
-        zoom: 16,
-        essential: true
-      });
+    mapRef.current.flyTo({
+      center: coords,
+      zoom: 16,
+      essential: true
+    });
 
-      // Marcador de destino
-      if (destMarkerRef.current) {
-        destMarkerRef.current.remove();
-      }
-
-      const el = document.createElement('div');
-      el.style.cssText =
-        'width: 22px; height: 22px; background-color: #dc2626; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(220,38,38,0.6);';
-
-      destMarkerRef.current = new mapboxgl.Marker(el)
-        .setLngLat(coords)
-        .addTo(mapRef.current);
+    if (destMarkerRef.current) {
+      destMarkerRef.current.remove();
     }
+
+    const el = document.createElement('div');
+    el.style.cssText =
+      'width: 22px; height: 22px; background-color: #dc2626; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(220,38,38,0.6);';
+
+    destMarkerRef.current = new mapboxgl.Marker(el)
+      .setLngLat(coords)
+      .addTo(mapRef.current);
   }, [targetDestination]);
 
-  // Quando clica em "Seguir rota a pé"
+  // Quando seleciona uma PARADA (pesquisa ou clique) → voa até ela
+  useEffect(() => {
+    if (!mapRef.current || !selectedStop) return;
+    if (!selectedStop.lon || !selectedStop.lat) return;
+
+    mapRef.current.flyTo({
+      center: [selectedStop.lon, selectedStop.lat],
+      zoom: 17,
+      essential: true
+    });
+  }, [selectedStop]);
+
+  // Botão "Seguir rota a pé"
   useEffect(() => {
     if (!mapRef.current || !selectedStopForRoute) return;
 
@@ -281,7 +288,6 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
     const origin = userPosRef.current || userPos;
 
     if (!origin || !stop.lon || !stop.lat) {
-      // Se não tiver GPS, só voa até a parada
       mapRef.current.flyTo({
         center: [stop.lon, stop.lat],
         zoom: 16,
@@ -293,7 +299,6 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
     const start = origin.join(',');
     const end = `${stop.lon},${stop.lat}`;
 
-    // Chama a API de direções do Mapbox (caminhada)
     fetch(
       `https://api.mapbox.com/directions/v5/mapbox/walking/${start};${end}?geometries=geojson&access_token=${token}`
     )
@@ -316,7 +321,6 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
           });
         }
 
-        // Ajusta o mapa para mostrar a rota inteira
         const coordinates = route.geometry.coordinates;
         const bounds = coordinates.reduce(
           (b, coord) => b.extend(coord),
@@ -330,7 +334,6 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStopForRo
       })
       .catch((err) => {
         console.error('Erro ao traçar rota:', err);
-        // Fallback: só centraliza na parada
         mapRef.current.flyTo({
           center: [stop.lon, stop.lat],
           zoom: 16
