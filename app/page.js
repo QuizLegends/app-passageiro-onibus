@@ -33,10 +33,12 @@ export default function AppHome() {
 
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
+    setActiveStop(null); // limpa parada ao escolher um lugar
   };
 
   const handleSelectStop = (stop) => {
     setActiveStop(stop);
+    setSelectedDestination(null); // limpa destino ao escolher parada
   };
 
   const handleStartRouteToStop = () => {
@@ -50,7 +52,10 @@ export default function AppHome() {
       
       {/* CABEÇALHO */}
       <header className="bg-gradient-to-r from-purple-800 to-indigo-900 p-4 pt-6 text-white rounded-b-2xl shadow-lg z-20 shrink-0">
-        <SearchHeader onSelectDestination={handleSelectDestination} />
+        <SearchHeader 
+          onSelectDestination={handleSelectDestination}
+          onSelectStop={handleSelectStop}
+        />
       </header>
 
       {/* MAPA */}
@@ -134,7 +139,7 @@ export default function AppHome() {
               </span>
               <h2 className="text-base font-bold text-purple-900">Paradas no Mapa</h2>
               <p className="text-xs text-slate-600 mt-0.5">
-                Toque em uma parada 🚌 para ver linhas e horários.
+                Toque em uma parada 🚌 ou busque no campo acima.
               </p>
             </div>
           )}
