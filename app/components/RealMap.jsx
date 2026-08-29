@@ -14,7 +14,8 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
   const [userPos, setUserPos] = useState(null);
   const [paradas, setParadas] = useState([]);
   const [paradaLinhas, setParadaLinhas] = useState({});
-  const [linhasMap, setLinhasMap] = useState({}); // código → nome completo
+  const [linhasMap, setLinhasMap] = useState({});
+  const [horarios, setHorarios] = useState({});
   const [status, setStatus] = useState('carregando');
   const [mensagemErro, setMensagemErro] = useState('');
 
@@ -33,25 +34,28 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     }
   }));
 
-  // Carrega os 3 arquivos
+  // Carrega todos os dados
   useEffect(() => {
     async function carregarDados() {
       try {
-        const [resParadas, resParadaLinhas, resLinhas] = await Promise.all([
+        const [resParadas, resParadaLinhas, resLinhas, resHorarios] = await Promise.all([
           fetch('/paradas.json'),
           fetch('/parada_linhas.json'),
-          fetch('/linhas.json')
+          fetch('/linhas.json'),
+          fetch('/horarios.json')
         ]);
 
         if (!resParadas.ok) throw new Error(`paradas.json → ${resParadas.status}`);
         if (!resParadaLinhas.ok) throw new Error(`parada_linhas.json → ${resParadaLinhas.status}`);
         if (!resLinhas.ok) throw new Error(`linhas.json → ${resLinhas.status}`);
+        if (!resHorarios.ok) throw new Error(`horarios.json → ${resHorarios.status}`);
 
         const dadosParadas = await resParadas.json();
         const dadosParadaLinhas = await resParadaLinhas.json();
         const dadosLinhas = await resLinhas.json();
+        const dadosHorarios = await resHorarios.json();
 
-        // Cria um mapa rápido: código da linha → nome completo
+        // Mapa de código da linha → nome completo
         const mapa = {};
         dadosLinhas.forEach((linha) => {
           mapa[linha.code] = `${linha.code} - ${linha.name}`;
@@ -60,6 +64,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         setParadas(dadosParadas);
         setParadaLinhas(dadosParadaLinhas);
         setLinhasMap(mapa);
+        setHorarios(dadosHorarios);
         setStatus('pronto');
       } catch (err) {
         console.error(err);
@@ -138,30 +143,17 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         const props = feature.properties;
 
         const codigosLinhas = paradaLinhas[props.id] || [];
-        
-        // Transforma os códigos em nomes completos
-        const nomesLinhas = codigosLinhas.map(
-          (codigo) => linhasMap[codigo] || codigo
-        );
+        const nomesLinhas = codigosLinhas.map((codigo) => linhasMap[codigo] || codigo);
 
-        const linhasHtml = nomesLinhas.length > 0
-          ? `<div style="margin-top:8px; font-size:11px; color:#334155; max-height:120px; overflow-y:auto;">
-               <strong style="display:block; margin-bottom:4px;">Linhas que passam aqui:</strong>
-               ${nomesLinhas.map(n => `<div style="margin-bottom:2px;">• ${n}</div>`).join('')}
-             </div>`
-          : `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">Nenhuma linha encontrada</div>`;
+        // Horários desta parada
+        const horariosDaParada = horarios[props.id] || {};
 
-        new mapboxgl.Popup({ offset: 15, maxWidth: '280px' })
-          .setLngLat(coordinates)
-          .setHTML(`
-            <div style="font-family: sans-serif; padding: 4px;">
-              <strong style="font-size: 14px; color: #0f172a; display: block;">
-                🚏 Parada ${props.code}
-              </strong>
-              ${linhasHtml}
-            </div>
-          `)
-          .addTo(map);
+        // Monta lista de linhas com seus horários
+        const linhasComHorarios = codigosLinhas.map((codigo) => ({
+          codigo,
+          nome: linhasMap[codigo] || codigo,
+          horarios: horariosDaParada[codigo] || []
+        }));
 
         if (onSelectStop) {
           onSelectStop({
@@ -171,9 +163,23 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
             lon: coordinates[0],
             lat: coordinates[1],
             routes: codigosLinhas,
-            routesNames: nomesLinhas   // nomes completos
+            routesNames: nomesLinhas,
+            linhasComHorarios: linhasComHorarios
           });
         }
+
+        // Popup simples
+        new mapboxgl.Popup({ offset: 15, maxWidth: '260px' })
+          .setLngLat(coordinates)
+          .setHTML(`
+            <div style="font-family: sans-serif; padding: 4px;">
+              <strong style="font-size: 14px; color: #0f172a;">🚏 Parada ${props.code}</strong>
+              <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                ${nomesLinhas.length} linha(s) passam aqui
+              </div>
+            </div>
+          `)
+          .addTo(map);
       });
 
       map.on('mouseenter', 'bus-stops-circle', () => {
@@ -215,7 +221,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         mapRef.current = null;
       }
     };
-  }, [status, token, paradas, paradaLinhas, linhasMap]);
+  }, [status, token, paradas, paradaLinhas, linhasMap, horarios]);
 
   return (
     <div className="w-full h-full min-h-full relative bg-slate-200">
@@ -223,7 +229,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
 
       {status === 'carregando' && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-200/90 z-10">
-          <span className="text-purple-900 font-semibold text-sm">Carregando paradas...</span>
+          <span className="text-purple-900 font-semibold text-sm">Carregando dados...</span>
         </div>
       )}
 
