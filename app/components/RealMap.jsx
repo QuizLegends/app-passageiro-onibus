@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115];
 
-const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, selectedStopForRoute }, ref) => {
+const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, selectedStopForRoute, onRouteInfo }, ref) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
@@ -268,7 +268,7 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, sel
       .addTo(mapRef.current);
   }, [targetDestination]);
 
-  // Quando seleciona uma PARADA (pesquisa ou clique) → voa até ela
+  // Quando seleciona uma PARADA → voa até ela
   useEffect(() => {
     if (!mapRef.current || !selectedStop) return;
     if (!selectedStop.lon || !selectedStop.lat) return;
@@ -280,9 +280,19 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, sel
     });
   }, [selectedStop]);
 
-  // Botão "Seguir rota a pé"
+  // Botão "Seguir rota a pé" + cancelar
   useEffect(() => {
-    if (!mapRef.current || !selectedStopForRoute) return;
+    if (!mapRef.current) return;
+
+    // Se não tiver rota selecionada, limpa a linha
+    if (!selectedStopForRoute) {
+      const source = mapRef.current.getSource('route');
+      if (source) {
+        source.setData({ type: 'FeatureCollection', features: [] });
+      }
+      if (onRouteInfo) onRouteInfo(null);
+      return;
+    }
 
     const stop = selectedStopForRoute;
     const origin = userPosRef.current || userPos;
@@ -318,6 +328,14 @@ const RealMap = forwardRef(({ onSelectStop, targetDestination, selectedStop, sel
           source.setData({
             type: 'FeatureCollection',
             features: [geojson]
+          });
+        }
+
+        // Envia distância e tempo
+        if (onRouteInfo) {
+          onRouteInfo({
+            distance: route.distance, // metros
+            duration: route.duration  // segundos
           });
         }
 
