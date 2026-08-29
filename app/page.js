@@ -16,6 +16,52 @@ const RealMap = dynamicNext(() => import('./components/RealMap'), {
   )
 });
 
+// Componente de linha com horários expansíveis
+function LinhaComHorarios({ linha }) {
+  const [expandido, setExpandido] = useState(false);
+
+  const horariosVisiveis = expandido
+    ? linha.horarios
+    : (linha.horarios || []).slice(0, 12);
+
+  const temMais = (linha.horarios?.length || 0) > 12;
+
+  return (
+    <div className="bg-purple-50 rounded-xl p-2 border border-purple-100">
+      <p className="text-[11px] font-bold text-purple-900 mb-1">
+        {linha.nome}
+      </p>
+
+      {linha.horarios && linha.horarios.length > 0 ? (
+        <div className="flex flex-wrap gap-1">
+          {horariosVisiveis.map((hora, i) => (
+            <span
+              key={i}
+              className="text-[10px] bg-white text-slate-700 px-1.5 py-0.5 rounded border border-slate-200"
+            >
+              {hora}
+            </span>
+          ))}
+
+          {temMais && (
+            <button
+              type="button"
+              onClick={() => setExpandido(!expandido)}
+              className="text-[10px] font-semibold text-purple-700 px-1.5 py-0.5 rounded border border-purple-300 bg-purple-100 active:bg-purple-200"
+            >
+              {expandido
+                ? 'mostrar menos'
+                : `+${linha.horarios.length - 12}`}
+            </button>
+          )}
+        </div>
+      ) : (
+        <p className="text-[10px] text-slate-400">Sem horários</p>
+      )}
+    </div>
+  );
+}
+
 export default function AppHome() {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [activeStop, setActiveStop] = useState(null);
@@ -72,6 +118,7 @@ export default function AppHome() {
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 transition-all">
           {activeStop ? (
             <div>
+              {/* Cabeçalho da parada */}
               <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
                   <Bus className="w-4 h-4" />
@@ -86,33 +133,11 @@ export default function AppHome() {
                 </div>
               </div>
 
+              {/* Linhas + Horários (com expansão) */}
               {activeStop.linhasComHorarios && activeStop.linhasComHorarios.length > 0 ? (
-                <div className="mb-3 max-h-48 overflow-y-auto space-y-2">
+                <div className="mb-3 max-h-52 overflow-y-auto space-y-2">
                   {activeStop.linhasComHorarios.map((linha, index) => (
-                    <div key={index} className="bg-purple-50 rounded-xl p-2 border border-purple-100">
-                      <p className="text-[11px] font-bold text-purple-900 mb-1">
-                        {linha.nome}
-                      </p>
-                      {linha.horarios && linha.horarios.length > 0 ? (
-                        <div className="flex flex-wrap gap-1">
-                          {linha.horarios.slice(0, 12).map((hora, i) => (
-                            <span
-                              key={i}
-                              className="text-[10px] bg-white text-slate-700 px-1.5 py-0.5 rounded border border-slate-200"
-                            >
-                              {hora}
-                            </span>
-                          ))}
-                          {linha.horarios.length > 12 && (
-                            <span className="text-[10px] text-slate-500 px-1">
-                              +{linha.horarios.length - 12}
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        <p className="text-[10px] text-slate-400">Sem horários</p>
-                      )}
-                    </div>
+                    <LinhaComHorarios key={index} linha={linha} />
                   ))}
                 </div>
               ) : (
@@ -121,6 +146,7 @@ export default function AppHome() {
                 </p>
               )}
 
+              {/* Botão de rota a pé */}
               <button
                 type="button"
                 onClick={handleStartRouteToStop}
