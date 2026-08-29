@@ -76,43 +76,33 @@ export default function AppHome() {
                     <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
                       Parada Selecionada
                     </span>
-                    <h2 className="text-sm font-bold text-slate-800 truncate">
-                      {activeStop.code || activeStop.name}
+                    <h2 className="text-sm font-bold text-slate-800">
+                      Parada {activeStop.code}
                     </h2>
                   </div>
                 </div>
               </div>
 
-              {/* Código e nome */}
-              <div className="mb-2">
-                <p className="text-xs text-slate-500">
-                  Código: <span className="font-semibold text-slate-700">{activeStop.code}</span>
-                </p>
-                {activeStop.name && (
-                  <p className="text-xs text-slate-600 mt-0.5">{activeStop.name}</p>
-                )}
-              </div>
-
-              {/* Linhas que passam na parada */}
-              {activeStop.routes && activeStop.routes.length > 0 ? (
-                <div className="mb-3">
+              {/* Nomes das linhas */}
+              {activeStop.routesNames && activeStop.routesNames.length > 0 ? (
+                <div className="mb-3 max-h-32 overflow-y-auto">
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Linhas nesta parada
+                    Linhas que passam aqui
                   </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeStop.routes.map((linha) => (
-                      <span
-                        key={linha}
-                        className="inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-200"
+                  <div className="space-y-1">
+                    {activeStop.routesNames.map((nome, index) => (
+                      <div
+                        key={index}
+                        className="text-[11px] bg-purple-50 text-purple-900 px-2 py-1 rounded-lg border border-purple-100"
                       >
-                        {linha}
-                      </span>
+                        {nome}
+                      </div>
                     ))}
                   </div>
                 </div>
               ) : (
                 <p className="text-xs text-slate-400 mb-3">
-                  Nenhuma linha encontrada para esta parada.
+                  Nenhuma linha encontrada.
                 </p>
               )}
 
@@ -133,7 +123,7 @@ export default function AppHome() {
               </span>
               <h2 className="text-base font-bold text-purple-900">Paradas no Mapa</h2>
               <p className="text-xs text-slate-600 mt-0.5">
-                As paradas oficiais do Grande Recife aparecem com o ícone 🚌 no mapa.
+                Toque em uma parada 🚌 para ver as linhas que passam nela.
               </p>
             </div>
           )}
