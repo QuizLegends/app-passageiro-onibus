@@ -33,12 +33,12 @@ export default function AppHome() {
 
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
-    setActiveStop(null); // limpa parada ao escolher um lugar
+    setActiveStop(null);
   };
 
   const handleSelectStop = (stop) => {
     setActiveStop(stop);
-    setSelectedDestination(null); // limpa destino ao escolher parada
+    setSelectedDestination(null);
   };
 
   const handleStartRouteToStop = () => {
@@ -63,6 +63,7 @@ export default function AppHome() {
         <RealMap 
           ref={mapRef}
           targetDestination={selectedDestination}
+          selectedStop={activeStop}
           onSelectStop={handleSelectStop}
           selectedStopForRoute={selectedStopForRoute}
         />
@@ -71,7 +72,6 @@ export default function AppHome() {
         <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-3xl p-4 shadow-2xl border border-slate-100 z-10 transition-all">
           {activeStop ? (
             <div>
-              {/* Cabeçalho da parada */}
               <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
                 <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
                   <Bus className="w-4 h-4" />
@@ -86,7 +86,6 @@ export default function AppHome() {
                 </div>
               </div>
 
-              {/* Linhas + Horários */}
               {activeStop.linhasComHorarios && activeStop.linhasComHorarios.length > 0 ? (
                 <div className="mb-3 max-h-48 overflow-y-auto space-y-2">
                   {activeStop.linhasComHorarios.map((linha, index) => (
@@ -122,7 +121,6 @@ export default function AppHome() {
                 </p>
               )}
 
-              {/* Botão de rota a pé */}
               <button
                 type="button"
                 onClick={handleStartRouteToStop}
@@ -148,7 +146,6 @@ export default function AppHome() {
 
       {/* NAVEGAÇÃO INFERIOR */}
       <nav className="bg-purple-900 text-purple-200 flex justify-around py-3 px-2 rounded-t-2xl shadow-lg z-20 shrink-0">
-        
         <button 
           onClick={() => setActiveTab('rotas')}
           className={`flex flex-col items-center gap-1 transition-colors px-3 py-1 rounded-xl ${
@@ -188,9 +185,7 @@ export default function AppHome() {
           <Navigation className="w-5 h-5" />
           <span className="text-[10px]">GPS</span>
         </button>
-
       </nav>
-
     </div>
   );
 }
