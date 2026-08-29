@@ -67,38 +67,49 @@ export default function AppHome() {
           {activeStop ? (
             <div>
               {/* Cabeçalho da parada */}
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2 mb-2">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
-                    <Bus className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
-                      Parada Selecionada
-                    </span>
-                    <h2 className="text-sm font-bold text-slate-800">
-                      Parada {activeStop.code}
-                    </h2>
-                  </div>
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-2 mb-2">
+                <div className="p-2 bg-emerald-600 text-white rounded-xl shrink-0">
+                  <Bus className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">
+                    Parada Selecionada
+                  </span>
+                  <h2 className="text-sm font-bold text-slate-800">
+                    Parada {activeStop.code}
+                  </h2>
                 </div>
               </div>
 
-              {/* Nomes das linhas */}
-              {activeStop.routesNames && activeStop.routesNames.length > 0 ? (
-                <div className="mb-3 max-h-32 overflow-y-auto">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Linhas que passam aqui
-                  </p>
-                  <div className="space-y-1">
-                    {activeStop.routesNames.map((nome, index) => (
-                      <div
-                        key={index}
-                        className="text-[11px] bg-purple-50 text-purple-900 px-2 py-1 rounded-lg border border-purple-100"
-                      >
-                        {nome}
-                      </div>
-                    ))}
-                  </div>
+              {/* Linhas + Horários */}
+              {activeStop.linhasComHorarios && activeStop.linhasComHorarios.length > 0 ? (
+                <div className="mb-3 max-h-48 overflow-y-auto space-y-2">
+                  {activeStop.linhasComHorarios.map((linha, index) => (
+                    <div key={index} className="bg-purple-50 rounded-xl p-2 border border-purple-100">
+                      <p className="text-[11px] font-bold text-purple-900 mb-1">
+                        {linha.nome}
+                      </p>
+                      {linha.horarios && linha.horarios.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {linha.horarios.slice(0, 12).map((hora, i) => (
+                            <span
+                              key={i}
+                              className="text-[10px] bg-white text-slate-700 px-1.5 py-0.5 rounded border border-slate-200"
+                            >
+                              {hora}
+                            </span>
+                          ))}
+                          {linha.horarios.length > 12 && (
+                            <span className="text-[10px] text-slate-500 px-1">
+                              +{linha.horarios.length - 12}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="text-[10px] text-slate-400">Sem horários</p>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ) : (
                 <p className="text-xs text-slate-400 mb-3">
@@ -123,7 +134,7 @@ export default function AppHome() {
               </span>
               <h2 className="text-base font-bold text-purple-900">Paradas no Mapa</h2>
               <p className="text-xs text-slate-600 mt-0.5">
-                Toque em uma parada 🚌 para ver as linhas que passam nela.
+                Toque em uma parada 🚌 para ver linhas e horários.
               </p>
             </div>
           )}
