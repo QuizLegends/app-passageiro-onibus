@@ -66,6 +66,7 @@ export default function AppHome() {
   const [selectedDestination, setSelectedDestination] = useState(null);
   const [activeStop, setActiveStop] = useState(null);
   const [selectedStopForRoute, setSelectedStopForRoute] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
   const [activeTab, setActiveTab] = useState(null);
 
   const mapRef = useRef(null);
@@ -80,17 +81,26 @@ export default function AppHome() {
   const handleSelectDestination = (dest) => {
     setSelectedDestination(dest);
     setActiveStop(null);
+    setSelectedStopForRoute(null);
+    setRouteInfo(null);
   };
 
   const handleSelectStop = (stop) => {
     setActiveStop(stop);
     setSelectedDestination(null);
+    setSelectedStopForRoute(null);
+    setRouteInfo(null);
   };
 
   const handleStartRouteToStop = () => {
     if (activeStop) {
       setSelectedStopForRoute(activeStop);
     }
+  };
+
+  const handleCancelRoute = () => {
+    setSelectedStopForRoute(null);
+    setRouteInfo(null);
   };
 
   return (
@@ -112,6 +122,7 @@ export default function AppHome() {
           selectedStop={activeStop}
           onSelectStop={handleSelectStop}
           selectedStopForRoute={selectedStopForRoute}
+          onRouteInfo={setRouteInfo}
         />
 
         {/* CARD INFERIOR */}
@@ -133,9 +144,9 @@ export default function AppHome() {
                 </div>
               </div>
 
-              {/* Linhas + Horários (com expansão) */}
+              {/* Linhas + Horários */}
               {activeStop.linhasComHorarios && activeStop.linhasComHorarios.length > 0 ? (
-                <div className="mb-3 max-h-52 overflow-y-auto space-y-2">
+                <div className="mb-3 max-h-40 overflow-y-auto space-y-2">
                   {activeStop.linhasComHorarios.map((linha, index) => (
                     <LinhaComHorarios key={index} linha={linha} />
                   ))}
@@ -146,15 +157,43 @@ export default function AppHome() {
                 </p>
               )}
 
-              {/* Botão de rota a pé */}
-              <button
-                type="button"
-                onClick={handleStartRouteToStop}
-                className="w-full bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
-              >
-                <Navigation2 className="w-4 h-4" />
-                Seguir rota a pé até esta parada
-              </button>
+              {/* Rota a pé ou botão de iniciar */}
+              {selectedStopForRoute && routeInfo ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between bg-violet-50 border border-violet-100 rounded-xl px-3 py-2">
+                    <div className="text-xs text-violet-900">
+                      <span className="font-bold">
+                        {routeInfo.distance >= 1000
+                          ? `${(routeInfo.distance / 1000).toFixed(1)} km`
+                          : `${Math.round(routeInfo.distance)} m`}
+                      </span>
+                      {' • '}
+                      <span className="font-bold">
+                        {routeInfo.duration >= 60
+                          ? `${Math.round(routeInfo.duration / 60)} min`
+                          : `${Math.round(routeInfo.duration)} seg`}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleCancelRoute}
+                    className="w-full bg-red-500 active:bg-red-600 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+                  >
+                    Cancelar rota a pé
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleStartRouteToStop}
+                  className="w-full bg-purple-700 active:bg-purple-900 text-white font-bold py-2.5 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 text-xs"
+                >
+                  <Navigation2 className="w-4 h-4" />
+                  Seguir rota a pé até esta parada
+                </button>
+              )}
             </div>
           ) : (
             <div>
