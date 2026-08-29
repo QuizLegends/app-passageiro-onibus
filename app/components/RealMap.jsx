@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
 
-const defaultCenter = [-34.918, -8.115]; // Jaboatão / Recife
+const defaultCenter = [-34.918, -8.115];
 
 const RealMap = forwardRef(({ onSelectStop }, ref) => {
   const mapContainerRef = useRef(null);
@@ -14,11 +14,12 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
   const [userPos, setUserPos] = useState(null);
   const [paradas, setParadas] = useState([]);
   const [paradaLinhas, setParadaLinhas] = useState({});
-  const [dadosCarregados, setDadosCarregados] = useState(false);
+  const [linhasMap, setLinhasMap] = useState({}); // código → nome completo
+  const [status, setStatus] = useState('carregando');
+  const [mensagemErro, setMensagemErro] = useState('');
 
   const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-  // Botão de GPS exposto para o componente pai
   useImperativeHandle(ref, () => ({
     recenter: () => {
       const currentPos = userPosRef.current || userPos;
@@ -32,23 +33,38 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     }
   }));
 
-  // Carrega os dados da pasta public
+  // Carrega os 3 arquivos
   useEffect(() => {
     async function carregarDados() {
       try {
-        const [resParadas, resLinhas] = await Promise.all([
+        const [resParadas, resParadaLinhas, resLinhas] = await Promise.all([
           fetch('/paradas.json'),
-          fetch('/parada_linhas.json')
+          fetch('/parada_linhas.json'),
+          fetch('/linhas.json')
         ]);
 
+        if (!resParadas.ok) throw new Error(`paradas.json → ${resParadas.status}`);
+        if (!resParadaLinhas.ok) throw new Error(`parada_linhas.json → ${resParadaLinhas.status}`);
+        if (!resLinhas.ok) throw new Error(`linhas.json → ${resLinhas.status}`);
+
         const dadosParadas = await resParadas.json();
+        const dadosParadaLinhas = await resParadaLinhas.json();
         const dadosLinhas = await resLinhas.json();
 
+        // Cria um mapa rápido: código da linha → nome completo
+        const mapa = {};
+        dadosLinhas.forEach((linha) => {
+          mapa[linha.code] = `${linha.code} - ${linha.name}`;
+        });
+
         setParadas(dadosParadas);
-        setParadaLinhas(dadosLinhas);
-        setDadosCarregados(true);
+        setParadaLinhas(dadosParadaLinhas);
+        setLinhasMap(mapa);
+        setStatus('pronto');
       } catch (err) {
-        console.error('Erro ao carregar dados das paradas:', err);
+        console.error(err);
+        setMensagemErro(err.message || 'Erro desconhecido');
+        setStatus('erro');
       }
     }
 
@@ -56,7 +72,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
   }, []);
 
   useEffect(() => {
-    if (!token || !dadosCarregados || mapRef.current || !mapContainerRef.current) return;
+    if (status !== 'pronto' || !token || mapRef.current || !mapContainerRef.current) return;
 
     mapboxgl.accessToken = token;
 
@@ -73,7 +89,6 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
     map.on('load', () => {
       setTimeout(() => map.resize(), 200);
 
-      // Transforma as paradas reais em GeoJSON
       const features = paradas.map((parada) => ({
         type: 'Feature',
         geometry: {
@@ -83,20 +98,15 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         properties: {
           id: parada.id,
           code: parada.code,
-          name: parada.name,
-          url: parada.url || ''
+          name: parada.name
         }
       }));
 
       map.addSource('bus-stops-source', {
         type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features
-        }
+        data: { type: 'FeatureCollection', features }
       });
 
-      // Círculo verde
       map.addLayer({
         id: 'bus-stops-circle',
         type: 'circle',
@@ -109,7 +119,6 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         }
       });
 
-      // Emoji 🚌
       map.addLayer({
         id: 'bus-stops-icon',
         type: 'symbol',
@@ -121,7 +130,6 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         }
       });
 
-      // Clique na parada
       map.on('click', 'bus-stops-circle', (e) => {
         if (!e.features || e.features.length === 0) return;
 
@@ -129,25 +137,27 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         const coordinates = feature.geometry.coordinates.slice();
         const props = feature.properties;
 
-        // Linhas que passam nesta parada
-        const linhas = paradaLinhas[props.id] || [];
+        const codigosLinhas = paradaLinhas[props.id] || [];
+        
+        // Transforma os códigos em nomes completos
+        const nomesLinhas = codigosLinhas.map(
+          (codigo) => linhasMap[codigo] || codigo
+        );
 
-        const linhasHtml = linhas.length > 0
-          ? `<div style="margin-top:6px; font-size:11px; color:#334155;">
-               <strong>Linhas:</strong> ${linhas.join(', ')}
+        const linhasHtml = nomesLinhas.length > 0
+          ? `<div style="margin-top:8px; font-size:11px; color:#334155; max-height:120px; overflow-y:auto;">
+               <strong style="display:block; margin-bottom:4px;">Linhas que passam aqui:</strong>
+               ${nomesLinhas.map(n => `<div style="margin-bottom:2px;">• ${n}</div>`).join('')}
              </div>`
           : `<div style="margin-top:6px; font-size:11px; color:#94a3b8;">Nenhuma linha encontrada</div>`;
 
-        new mapboxgl.Popup({ offset: 15 })
+        new mapboxgl.Popup({ offset: 15, maxWidth: '280px' })
           .setLngLat(coordinates)
           .setHTML(`
-            <div style="font-family: sans-serif; padding: 2px; min-width: 140px;">
-              <strong style="font-size: 13px; color: #0f172a; display: block;">
-                🚏 ${props.code}
+            <div style="font-family: sans-serif; padding: 4px;">
+              <strong style="font-size: 14px; color: #0f172a; display: block;">
+                🚏 Parada ${props.code}
               </strong>
-              <span style="font-size: 11px; color: #64748b; display: block; margin-top: 2px;">
-                ${props.name}
-              </span>
               ${linhasHtml}
             </div>
           `)
@@ -157,11 +167,11 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
           onSelectStop({
             id: props.id,
             code: props.code,
-            name: props.name,
-            address: `Código: ${props.code}`,
+            name: `Parada ${props.code}`,
             lon: coordinates[0],
             lat: coordinates[1],
-            routes: linhas
+            routes: codigosLinhas,
+            routesNames: nomesLinhas   // nomes completos
           });
         }
       });
@@ -174,7 +184,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
       });
     });
 
-    // GPS do usuário
+    // GPS
     if (typeof window !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.watchPosition(
         (pos) => {
@@ -194,7 +204,7 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
             userMarkerRef.current.setLngLat(coords);
           }
         },
-        (err) => console.warn('GPS Warning:', err.message),
+        (err) => console.warn('GPS:', err.message),
         { enableHighAccuracy: true, timeout: 10000 }
       );
     }
@@ -205,15 +215,22 @@ const RealMap = forwardRef(({ onSelectStop }, ref) => {
         mapRef.current = null;
       }
     };
-  }, [token, dadosCarregados, paradas, paradaLinhas]);
+  }, [status, token, paradas, paradaLinhas, linhasMap]);
 
   return (
     <div className="w-full h-full min-h-full relative bg-slate-200">
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
-      
-      {!dadosCarregados && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-200/80 z-10">
+
+      {status === 'carregando' && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-200/90 z-10">
           <span className="text-purple-900 font-semibold text-sm">Carregando paradas...</span>
+        </div>
+      )}
+
+      {status === 'erro' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-200/95 z-10 p-6 text-center">
+          <p className="text-red-600 font-bold text-sm mb-2">Erro ao carregar dados</p>
+          <p className="text-slate-600 text-xs">{mensagemErro}</p>
         </div>
       )}
     </div>
