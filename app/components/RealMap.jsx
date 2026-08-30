@@ -117,7 +117,7 @@ const RealMap = forwardRef(
             coordinates: [parada.lon, parada.lat]
           },
           properties: {
-            id: parada.id,
+            id: String(parada.id),
             code: parada.code,
             name: parada.name
           }
@@ -128,7 +128,7 @@ const RealMap = forwardRef(
           data: { type: 'FeatureCollection', features }
         });
 
-        // Círculo verde (fundo do ícone)
+        // Círculo verde
         map.addLayer({
           id: 'bus-stops-circle',
           type: 'circle',
@@ -141,7 +141,7 @@ const RealMap = forwardRef(
           }
         });
 
-        // Ícone de ônibus
+        // Ícone de ônibus verde
         map.addLayer({
           id: 'bus-stops-icon',
           type: 'symbol',
@@ -154,7 +154,7 @@ const RealMap = forwardRef(
           }
         });
 
-        // Fonte da rota a pé
+        // Rota a pé
         map.addSource('route', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features: [] }
@@ -227,7 +227,7 @@ const RealMap = forwardRef(
         });
       });
 
-      // GPS do usuário (ponto azul pulsando)
+      // GPS — ponto azul pulsando
       if (typeof window !== 'undefined' && navigator.geolocation) {
         navigator.geolocation.watchPosition(
           (pos) => {
@@ -286,34 +286,53 @@ const RealMap = forwardRef(
         .addTo(mapRef.current);
     }, [targetDestination]);
 
-    // Parada selecionada → voa + ônibus azul pulsando
+    // Parada selecionada → voa + MESMO ícone verde pulsando
     useEffect(() => {
       if (!mapRef.current || !selectedStop) return;
       if (!selectedStop.lon || !selectedStop.lat) return;
 
-      mapRef.current.flyTo({
+      const map = mapRef.current;
+      const stopId = String(selectedStop.id);
+
+      map.flyTo({
         center: [selectedStop.lon, selectedStop.lat],
         zoom: 17,
         essential: true
       });
 
+      // Remove marcador anterior
       if (selectedMarkerRef.current) {
         selectedMarkerRef.current.remove();
         selectedMarkerRef.current = null;
       }
 
+      // Ícone VERDE pulsando no mesmo lugar
       const el = document.createElement('div');
-      el.className = 'pulse-bus';
-      el.innerHTML = '<div class="pulse-bus-core">🚌</div>';
+      el.className = 'pulse-bus-green';
+      el.innerHTML = '<div class="pulse-bus-green-core">🚌</div>';
 
       selectedMarkerRef.current = new mapboxgl.Marker({ element: el })
         .setLngLat([selectedStop.lon, selectedStop.lat])
-        .addTo(mapRef.current);
+        .addTo(map);
+
+      // Esconde o ícone original dessa parada (evita duplicar)
+      if (map.getLayer('bus-stops-circle')) {
+        map.setFilter('bus-stops-circle', ['!=', ['get', 'id'], stopId]);
+      }
+      if (map.getLayer('bus-stops-icon')) {
+        map.setFilter('bus-stops-icon', ['!=', ['get', 'id'], stopId]);
+      }
 
       return () => {
         if (selectedMarkerRef.current) {
           selectedMarkerRef.current.remove();
           selectedMarkerRef.current = null;
+        }
+        if (map.getLayer('bus-stops-circle')) {
+          map.setFilter('bus-stops-circle', null);
+        }
+        if (map.getLayer('bus-stops-icon')) {
+          map.setFilter('bus-stops-icon', null);
         }
       };
     }, [selectedStop]);
@@ -446,6 +465,8 @@ const RealMap = forwardRef(
               opacity: 0;
             }
           }
+
+          /* GPS azul pulsando */
           .pulse-dot {
             position: relative;
             width: 18px;
@@ -469,7 +490,9 @@ const RealMap = forwardRef(
             position: relative;
             z-index: 1;
           }
-          .pulse-bus {
+
+          /* Parada selecionada — ônibus VERDE pulsando */
+          .pulse-bus-green {
             position: relative;
             width: 32px;
             height: 32px;
@@ -477,25 +500,25 @@ const RealMap = forwardRef(
             align-items: center;
             justify-content: center;
           }
-          .pulse-bus::before {
+          .pulse-bus-green::before {
             content: '';
             position: absolute;
             inset: -4px;
             border-radius: 50%;
-            background: rgba(37, 99, 235, 0.35);
+            background: rgba(22, 163, 74, 0.4);
             animation: pulse-ring 1.6s ease-out infinite;
           }
-          .pulse-bus-core {
+          .pulse-bus-green-core {
             width: 28px;
             height: 28px;
-            background: #2563eb;
+            background: #16a34a;
             border: 2.5px solid white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 14px;
-            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+            box-shadow: 0 0 10px rgba(22, 163, 74, 0.5);
             position: relative;
             z-index: 1;
           }
