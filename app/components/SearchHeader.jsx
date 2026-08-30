@@ -18,7 +18,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     async function carregar() {
       try {
         const [resParadas, resLinhas, resParadaLinhas] = await Promise.all([
-          fetch('/paradas_com_rua.json'), // usa o arquivo com ruas
+          fetch('/paradas_com_rua.json'),
           fetch('/linhas.json'),
           fetch('/parada_linhas.json')
         ]);
@@ -246,16 +246,17 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         )}
       </div>
 
+      {/* Resultados — texto completo, sem truncar */}
       {isOpen && results.length > 0 && (
         <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-80 overflow-y-auto z-50">
           {results.map((item) => (
             <div
               key={item.id}
               onClick={() => handleSelect(item)}
-              className="flex items-center gap-3 p-3 hover:bg-purple-50 cursor-pointer border-b border-slate-100 last:border-none transition-colors"
+              className="flex items-start gap-3 p-3 hover:bg-purple-50 cursor-pointer border-b border-slate-100 last:border-none transition-colors"
             >
               <div
-                className={`p-2 rounded-full shrink-0 ${
+                className={`p-2 rounded-full shrink-0 mt-0.5 ${
                   item.type === 'line-stop'
                     ? 'bg-indigo-100 text-indigo-700'
                     : item.type === 'stop'
@@ -271,11 +272,11 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
                   <MapPin className="w-4 h-4" />
                 )}
               </div>
-              <div className="flex flex-col min-w-0">
-                <span className="text-sm font-bold text-slate-800 truncate">
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-sm font-bold text-slate-800 leading-snug break-words">
                   {item.title}
                 </span>
-                <span className="text-xs text-slate-500 truncate">
+                <span className="text-xs text-slate-500 leading-snug break-words mt-0.5">
                   {item.subtitle}
                 </span>
               </div>
