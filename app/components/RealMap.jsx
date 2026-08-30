@@ -5,6 +5,88 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115];
 
+// Ícone igual ao card (Lucide Bus em fundo verde)
+function criarIconeOnibusVerde(size = 28) {
+  const el = document.createElement('div');
+  el.style.cssText = `
+    width: ${size}px;
+    height: ${size}px;
+    background: #16a34a;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  `;
+  const iconSize = Math.round(size * 0.55);
+  el.innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24"
+      fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 6v6"/>
+      <path d="M15 6v6"/>
+      <path d="M2 12h19.6"/>
+      <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+      <circle cx="7" cy="18" r="2"/>
+      <path d="M9 18h6"/>
+      <circle cx="17" cy="18" r="2"/>
+    </svg>
+  `;
+  return el;
+}
+
+// Gera imagem do ícone para o Mapbox (todas as paradas)
+function gerarImagemOnibusMapbox() {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Fundo verde arredondado
+  const r = 18;
+  ctx.fillStyle = '#16a34a';
+  ctx.beginPath();
+  ctx.moveTo(r, 4);
+  ctx.arcTo(size - 4, 4, size - 4, size - 4, r);
+  ctx.arcTo(size - 4, size - 4, 4, size - 4, r);
+  ctx.arcTo(4, size - 4, 4, 4, r);
+  ctx.arcTo(4, 4, size - 4, 4, r);
+  ctx.closePath();
+  ctx.fill();
+
+  // Borda branca
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Desenha o SVG do Bus em branco no centro
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+      fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 6v6"/>
+      <path d="M15 6v6"/>
+      <path d="M2 12h19.6"/>
+      <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+      <circle cx="7" cy="18" r="2"/>
+      <path d="M9 18h6"/>
+      <circle cx="17" cy="18" r="2"/>
+    </svg>
+  `;
+  const img = new Image();
+  const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(svgBlob);
+
+  return new Promise((resolve) => {
+    img.onload = () => {
+      ctx.drawImage(img, (size - 36) / 2, (size - 36) / 2, 36, 36);
+      URL.revokeObjectURL(url);
+      resolve(canvas);
+    };
+    img.src = url;
+  });
+}
+
 const RealMap = forwardRef(
   (
     {
@@ -107,7 +189,7 @@ const RealMap = forwardRef(
 
       mapRef.current = map;
 
-      map.on('load', () => {
+      map.on('load', async () => {
         setTimeout(() => map.resize(), 200);
 
         const features = paradas.map((parada) => ({
@@ -128,29 +210,25 @@ const RealMap = forwardRef(
           data: { type: 'FeatureCollection', features }
         });
 
-        // Círculo verde
-        map.addLayer({
-          id: 'bus-stops-circle',
-          type: 'circle',
-          source: 'bus-stops-source',
-          paint: {
-            'circle-color': '#16a34a',
-            'circle-radius': 14,
-            'circle-stroke-width': 2.5,
-            'circle-stroke-color': '#ffffff'
+        // Ícone Lucide Bus (sem círculo separado)
+        try {
+          const canvas = await gerarImagemOnibusMapbox();
+          if (!map.hasImage('bus-lucide')) {
+            map.addImage('bus-lucide', canvas);
           }
-        });
+        } catch (err) {
+          console.error('Erro ao gerar ícone:', err);
+        }
 
-        // Ícone de ônibus verde
         map.addLayer({
           id: 'bus-stops-icon',
           type: 'symbol',
           source: 'bus-stops-source',
           layout: {
-            'text-field': '🚌',
-            'text-size': 13,
-            'text-allow-overlap': true,
-            'text-ignore-placement': true
+            'icon-image': 'bus-lucide',
+            'icon-size': 0.55,
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true
           }
         });
 
@@ -176,7 +254,7 @@ const RealMap = forwardRef(
         });
 
         // Clique na parada
-        map.on('click', 'bus-stops-circle', (e) => {
+        map.on('click', 'bus-stops-icon', (e) => {
           if (!e.features || e.features.length === 0) return;
 
           const feature = e.features[0];
@@ -219,10 +297,10 @@ const RealMap = forwardRef(
             .addTo(map);
         });
 
-        map.on('mouseenter', 'bus-stops-circle', () => {
+        map.on('mouseenter', 'bus-stops-icon', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
-        map.on('mouseleave', 'bus-stops-circle', () => {
+        map.on('mouseleave', 'bus-stops-icon', () => {
           map.getCanvas().style.cursor = '';
         });
       });
@@ -260,7 +338,7 @@ const RealMap = forwardRef(
       };
     }, [status, token, paradas, paradaLinhas, linhasMap, horarios]);
 
-    // Lugar da pesquisa → voa até lá
+    // Lugar da pesquisa
     useEffect(() => {
       if (!mapRef.current || !targetDestination) return;
       if (!targetDestination.lon || !targetDestination.lat) return;
@@ -286,7 +364,7 @@ const RealMap = forwardRef(
         .addTo(mapRef.current);
     }, [targetDestination]);
 
-    // Parada selecionada → voa + MESMO ícone verde pulsando
+    // Parada selecionada → mesmo ícone Lucide pulsando
     useEffect(() => {
       if (!mapRef.current || !selectedStop) return;
       if (!selectedStop.lon || !selectedStop.lat) return;
@@ -300,25 +378,22 @@ const RealMap = forwardRef(
         essential: true
       });
 
-      // Remove marcador anterior
       if (selectedMarkerRef.current) {
         selectedMarkerRef.current.remove();
         selectedMarkerRef.current = null;
       }
 
-      // Ícone VERDE pulsando no mesmo lugar
-      const el = document.createElement('div');
-      el.className = 'pulse-bus-green';
-      el.innerHTML = '<div class="pulse-bus-green-core">🚌</div>';
+      // Mesmo ícone do card, pulsando
+      const wrapper = document.createElement('div');
+      wrapper.className = 'pulse-bus-green';
+      const icon = criarIconeOnibusVerde(32);
+      wrapper.appendChild(icon);
 
-      selectedMarkerRef.current = new mapboxgl.Marker({ element: el })
+      selectedMarkerRef.current = new mapboxgl.Marker({ element: wrapper })
         .setLngLat([selectedStop.lon, selectedStop.lat])
         .addTo(map);
 
-      // Esconde o ícone original dessa parada (evita duplicar)
-      if (map.getLayer('bus-stops-circle')) {
-        map.setFilter('bus-stops-circle', ['!=', ['get', 'id'], stopId]);
-      }
+      // Esconde o ícone original dessa parada
       if (map.getLayer('bus-stops-icon')) {
         map.setFilter('bus-stops-icon', ['!=', ['get', 'id'], stopId]);
       }
@@ -328,16 +403,13 @@ const RealMap = forwardRef(
           selectedMarkerRef.current.remove();
           selectedMarkerRef.current = null;
         }
-        if (map.getLayer('bus-stops-circle')) {
-          map.setFilter('bus-stops-circle', null);
-        }
         if (map.getLayer('bus-stops-icon')) {
           map.setFilter('bus-stops-icon', null);
         }
       };
     }, [selectedStop]);
 
-    // Rota a pé + cancelar
+    // Rota a pé
     useEffect(() => {
       if (!mapRef.current) return;
 
@@ -453,20 +525,19 @@ const RealMap = forwardRef(
         <style jsx global>{`
           @keyframes pulse-ring {
             0% {
-              transform: scale(0.8);
-              opacity: 0.8;
+              transform: scale(0.85);
+              opacity: 0.75;
             }
             70% {
-              transform: scale(1.6);
+              transform: scale(1.55);
               opacity: 0;
             }
             100% {
-              transform: scale(0.8);
+              transform: scale(0.85);
               opacity: 0;
             }
           }
 
-          /* GPS azul pulsando */
           .pulse-dot {
             position: relative;
             width: 18px;
@@ -491,11 +562,8 @@ const RealMap = forwardRef(
             z-index: 1;
           }
 
-          /* Parada selecionada — ônibus VERDE pulsando */
           .pulse-bus-green {
             position: relative;
-            width: 32px;
-            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -503,24 +571,10 @@ const RealMap = forwardRef(
           .pulse-bus-green::before {
             content: '';
             position: absolute;
-            inset: -4px;
-            border-radius: 50%;
+            inset: -8px;
+            border-radius: 14px;
             background: rgba(22, 163, 74, 0.4);
             animation: pulse-ring 1.6s ease-out infinite;
-          }
-          .pulse-bus-green-core {
-            width: 28px;
-            height: 28px;
-            background: #16a34a;
-            border: 2.5px solid white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            box-shadow: 0 0 10px rgba(22, 163, 74, 0.5);
-            position: relative;
-            z-index: 1;
           }
         `}</style>
 
