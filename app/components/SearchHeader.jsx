@@ -10,16 +10,15 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
   const [isOpen, setIsOpen] = useState(false);
   const [paradas, setParadas] = useState([]);
   const [linhas, setLinhas] = useState([]);
-  const [paradaLinhas, setParadaLinhas] = useState({});
   const [linhaParaParadas, setLinhaParaParadas] = useState({});
   const searchRef = useRef(null);
 
-  // Carrega os dados uma vez
+  // Carrega os dados
   useEffect(() => {
     async function carregar() {
       try {
         const [resParadas, resLinhas, resParadaLinhas] = await Promise.all([
-          fetch('/paradas.json'),
+          fetch('/paradas_com_rua.json'), // usa o arquivo com ruas
           fetch('/linhas.json'),
           fetch('/parada_linhas.json')
         ]);
@@ -28,7 +27,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         const dadosLinhas = await resLinhas.json();
         const dadosParadaLinhas = await resParadaLinhas.json();
 
-        // Monta: código da linha → [stop_id, stop_id, ...]
+        // linha → [stop_id, ...]
         const mapa = {};
         Object.entries(dadosParadaLinhas).forEach(([stopId, listaLinhas]) => {
           listaLinhas.forEach((codigoLinha) => {
@@ -39,7 +38,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
 
         setParadas(dadosParadas);
         setLinhas(dadosLinhas);
-        setParadaLinhas(dadosParadaLinhas);
         setLinhaParaParadas(mapa);
       } catch (err) {
         console.error('Erro ao carregar dados da busca:', err);
@@ -59,7 +57,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Busca com debounce
+  // Busca (sem limite)
   useEffect(() => {
     if (query.trim().length < 1) {
       setResults([]);
@@ -76,8 +74,12 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         const qLimpo = q.replace(/^linha\s*/i, '').trim();
 
         const resultados = [];
+        const paradasPorId = {};
+        paradas.forEach((p) => {
+          paradasPorId[p.id] = p;
+        });
 
-        // ========== 1. LINHAS → TODAS as paradas da linha ==========
+        // ========== 1. LINHAS → todas as paradas da linha ==========
         const linhasFiltradas = linhas.filter((l) => {
           const code = (l.code || '').toLowerCase();
           const name = (l.name || '').toLowerCase();
@@ -89,23 +91,22 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           );
         });
 
-        const paradasPorId = {};
-        paradas.forEach((p) => {
-          paradasPorId[p.id] = p;
-        });
-
         linhasFiltradas.forEach((linha) => {
           const stopIds = linhaParaParadas[linha.code] || [];
 
-          // Sem limite — todas as paradas
           stopIds.forEach((stopId) => {
             const parada = paradasPorId[stopId];
             if (!parada) return;
 
+            const rua = parada.street || '';
+            const bairro = parada.locality || '';
+
             resultados.push({
               id: `line-stop-${linha.code}-${stopId}`,
               title: `${linha.code} - ${linha.name}`,
-              subtitle: `Parada ${parada.code}`,
+              subtitle: rua
+                ? `${rua}${bairro ? ` · ${bairro}` : ''} · Parada ${parada.code}`
+                : `Parada ${parada.code}`,
               lat: parada.lat,
               lon: parada.lon,
               type: 'line-stop',
@@ -115,24 +116,39 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           });
         });
 
-        // ========== 2. PARADAS diretas ==========
+        // ========== 2. PARADAS (código, nome ou RUA) ==========
         const paradasEncontradas = paradas
           .filter((p) => {
             const code = (p.code || '').toLowerCase();
             const name = (p.name || '').toLowerCase();
-            return code.includes(q) || name.includes(q) || code.includes(qLimpo);
+            const street = (p.street || '').toLowerCase();
+            const locality = (p.locality || '').toLowerCase();
+            return (
+              code.includes(q) ||
+              code.includes(qLimpo) ||
+              name.includes(q) ||
+              street.includes(q) ||
+              street.includes(qLimpo) ||
+              locality.includes(q)
+            );
           })
-          .map((p) => ({
-            id: `stop-${p.id}`,
-            title: `Parada ${p.code}`,
-            subtitle: p.name || `Código ${p.code}`,
-            lat: p.lat,
-            lon: p.lon,
-            type: 'stop',
-            stopData: p
-          }));
+          .map((p) => {
+            const rua = p.street || '';
+            const bairro = p.locality || '';
+            return {
+              id: `stop-${p.id}`,
+              title: rua || `Parada ${p.code}`,
+              subtitle: rua
+                ? `Parada ${p.code}${bairro ? ` · ${bairro}` : ''}`
+                : p.name || `Código ${p.code}`,
+              lat: p.lat,
+              lon: p.lon,
+              type: 'stop',
+              stopData: p
+            };
+          });
 
-        // Evita duplicar paradas já listadas pela busca de linha
+        // Evita duplicar
         const idsJaIncluidos = new Set(
           resultados.map((r) => r.stopData?.id).filter(Boolean)
         );
@@ -166,7 +182,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           }
         }
 
-        // Sem limite de resultados
+        // SEM LIMITE
         setResults([...resultados, ...lugares]);
       } catch (err) {
         console.error('Erro na busca:', err);
@@ -187,6 +203,8 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         id: item.stopData.id,
         code: item.stopData.code,
         name: item.stopData.name || `Parada ${item.stopData.code}`,
+        street: item.stopData.street || '',
+        locality: item.stopData.locality || '',
         lat: item.lat,
         lon: item.lon
       });
@@ -209,7 +227,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => query.length >= 1 && setIsOpen(true)}
-          placeholder="Buscar linha, parada ou lugar..."
+          placeholder="Buscar linha, parada, rua ou lugar..."
           className="bg-transparent w-full text-sm text-white placeholder-purple-200 focus:outline-none"
         />
 
@@ -228,7 +246,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         )}
       </div>
 
-      {/* Resultados */}
       {isOpen && results.length > 0 && (
         <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-80 overflow-y-auto z-50">
           {results.map((item) => (
