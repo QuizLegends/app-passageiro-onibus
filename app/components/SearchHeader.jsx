@@ -13,7 +13,9 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
   const [paradaLinhas, setParadaLinhas] = useState({});
   const searchRef = useRef(null);
 
-  // Carrega os dados uma vez
+  // Índice inverso: código da linha → lista de stop_ids
+  const [linhaParaParadas, setLinhaParaParadas] = useState({});
+
   useEffect(() => {
     async function carregar() {
       try {
@@ -27,9 +29,19 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         const dadosLinhas = await resLinhas.json();
         const dadosParadaLinhas = await resParadaLinhas.json();
 
+        // Monta: linha → [stop_id, stop_id, ...]
+        const mapa = {};
+        Object.entries(dadosParadaLinhas).forEach(([stopId, listaLinhas]) => {
+          listaLinhas.forEach((codigoLinha) => {
+            if (!mapa[codigoLinha]) mapa[codigoLinha] = [];
+            mapa[codigoLinha].push(stopId);
+          });
+        });
+
         setParadas(dadosParadas);
         setLinhas(dadosLinhas);
         setParadaLinhas(dadosParadaLinhas);
+        setLinhaParaParadas(mapa);
       } catch (err) {
         console.error('Erro ao carregar dados da busca:', err);
       }
@@ -37,7 +49,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     carregar();
   }, []);
 
-  // Fecha ao clicar fora
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -48,7 +59,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Busca com debounce
   useEffect(() => {
     if (query.trim().length < 1) {
       setResults([]);
@@ -62,38 +72,59 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
 
       try {
         const q = query.trim().toLowerCase();
-        // Remove a palavra "linha" se o usuário digitar "linha 001"
         const qLimpo = q.replace(/^linha\s*/i, '').trim();
 
-        // 1. Busca nas LINHAS
-        const linhasEncontradas = linhas
-          .filter((l) => {
-            const code = (l.code || '').toLowerCase();
-            const name = (l.name || '').toLowerCase();
-            return (
-              code.includes(qLimpo) ||
-              name.includes(qLimpo) ||
-              code.includes(q) ||
-              name.includes(q)
-            );
-          })
-          .slice(0, 6)
-          .map((l) => ({
-            id: `line-${l.id}`,
-            title: `${l.code} - ${l.name}`,
-            subtitle: 'Linha de ônibus',
-            type: 'line',
-            lineData: l
-          }));
+        const resultados = [];
 
-        // 2. Busca nas PARADAS
+        // ========== 1. LINHAS → expande em paradas da linha ==========
+        const linhasFiltradas = linhas.filter((l) => {
+          const code = (l.code || '').toLowerCase();
+          const name = (l.name || '').toLowerCase();
+          return (
+            code.includes(qLimpo) ||
+            name.includes(qLimpo) ||
+            code.includes(q) ||
+            name.includes(q)
+          );
+        });
+
+        // Mapa rápido de paradas por id
+        const paradasPorId = {};
+        paradas.forEach((p) => {
+          paradasPorId[p.id] = p;
+        });
+
+        linhasFiltradas.forEach((linha) => {
+          const stopIds = linhaParaParadas[linha.code] || [];
+
+          // Limita para não explodir a lista (máx. 25 paradas por linha na busca)
+          const stopIdsLimitados = stopIds.slice(0, 25);
+
+          stopIdsLimitados.forEach((stopId) => {
+            const parada = paradasPorId[stopId];
+            if (!parada) return;
+
+            resultados.push({
+              id: `line-stop-${linha.code}-${stopId}`,
+              title: `${linha.code} - ${linha.name}`,
+              subtitle: `Parada ${parada.code}`,
+              lat: parada.lat,
+              lon: parada.lon,
+              type: 'line-stop',
+              stopData: parada,
+              lineData: linha
+            });
+          });
+        });
+
+        // ========== 2. PARADAS diretas ==========
         const paradasEncontradas = paradas
           .filter((p) => {
             const code = (p.code || '').toLowerCase();
             const name = (p.name || '').toLowerCase();
             return code.includes(q) || name.includes(q) || code.includes(qLimpo);
           })
-          .slice(0, 5)
+          .slice(0, 8)
           .map((p) => ({
             id: `stop-${p.id}`,
             title: `Parada ${p.code}`,
@@ -104,7 +135,17 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
             stopData: p
           }));
 
-        // 3. Busca de LUGARES (Recife)
+        // Evita duplicar paradas que já vieram da busca por linha
+        const idsJaIncluidos = new Set(
+          resultados.map((r) => r.stopData?.id).filter(Boolean)
+        );
+        paradasEncontradas.forEach((p) => {
+          if (!idsJaIncluidos.has(p.stopData.id)) {
+            resultados.push(p);
+          }
+        });
+
+        // ========== 3. LUGARES ==========
         let lugares = [];
         if (q.length >= 3) {
           try {
@@ -128,8 +169,9 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           }
         }
 
-        // Ordem: Linhas → Paradas → Lugares
-        setResults([...linhasEncontradas, ...paradasEncontradas, ...lugares]);
+        // Limita total de resultados para não travar o celular
+        const todos = [...resultados, ...lugares].slice(0, 40);
+        setResults(todos);
       } catch (err) {
         console.error('Erro na busca:', err);
       } finally {
@@ -138,35 +180,13 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [query, paradas, linhas]);
+  }, [query, paradas, linhas, linhaParaParadas]);
 
   const handleSelect = (item) => {
     setQuery(item.title);
     setIsOpen(false);
 
-    if (item.type === 'line') {
-      // Ao selecionar uma linha → encontra uma parada que tenha essa linha
-      const codigoLinha = item.lineData.code;
-      let paradaEncontrada = null;
-
-      // Procura a primeira parada que tenha essa linha
-      for (const [stopId, listaLinhas] of Object.entries(paradaLinhas)) {
-        if (listaLinhas.includes(codigoLinha)) {
-          paradaEncontrada = paradas.find((p) => p.id === stopId);
-          if (paradaEncontrada) break;
-        }
-      }
-
-      if (paradaEncontrada && onSelectStop) {
-        onSelectStop({
-          id: paradaEncontrada.id,
-          code: paradaEncontrada.code,
-          name: paradaEncontrada.name || `Parada ${paradaEncontrada.code}`,
-          lat: paradaEncontrada.lat,
-          lon: paradaEncontrada.lon
-        });
-      }
-    } else if (item.type === 'stop' && onSelectStop) {
+    if ((item.type === 'line-stop' || item.type === 'stop') && onSelectStop) {
       onSelectStop({
         id: item.stopData.id,
         code: item.stopData.code,
@@ -212,7 +232,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         )}
       </div>
 
-      {/* Resultados */}
       {isOpen && results.length > 0 && (
         <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-80 overflow-y-auto z-50">
           {results.map((item) => (
@@ -223,14 +242,14 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
             >
               <div
                 className={`p-2 rounded-full shrink-0 ${
-                  item.type === 'line'
+                  item.type === 'line-stop'
                     ? 'bg-indigo-100 text-indigo-700'
                     : item.type === 'stop'
                     ? 'bg-emerald-100 text-emerald-700'
                     : 'bg-purple-100 text-purple-800'
                 }`}
               >
-                {item.type === 'line' ? (
+                {item.type === 'line-stop' ? (
                   <Route className="w-4 h-4" />
                 ) : item.type === 'stop' ? (
                   <Bus className="w-4 h-4" />
