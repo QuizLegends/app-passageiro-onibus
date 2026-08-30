@@ -11,11 +11,10 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
   const [paradas, setParadas] = useState([]);
   const [linhas, setLinhas] = useState([]);
   const [paradaLinhas, setParadaLinhas] = useState({});
+  const [linhaParaParadas, setLinhaParaParadas] = useState({});
   const searchRef = useRef(null);
 
-  // Índice inverso: código da linha → lista de stop_ids
-  const [linhaParaParadas, setLinhaParaParadas] = useState({});
-
+  // Carrega os dados uma vez
   useEffect(() => {
     async function carregar() {
       try {
@@ -29,7 +28,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         const dadosLinhas = await resLinhas.json();
         const dadosParadaLinhas = await resParadaLinhas.json();
 
-        // Monta: linha → [stop_id, stop_id, ...]
+        // Monta: código da linha → [stop_id, stop_id, ...]
         const mapa = {};
         Object.entries(dadosParadaLinhas).forEach(([stopId, listaLinhas]) => {
           listaLinhas.forEach((codigoLinha) => {
@@ -49,6 +48,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     carregar();
   }, []);
 
+  // Fecha ao clicar fora
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -59,6 +59,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Busca com debounce
   useEffect(() => {
     if (query.trim().length < 1) {
       setResults([]);
@@ -76,7 +77,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
 
         const resultados = [];
 
-        // ========== 1. LINHAS → expande em paradas da linha ==========
+        // ========== 1. LINHAS → TODAS as paradas da linha ==========
         const linhasFiltradas = linhas.filter((l) => {
           const code = (l.code || '').toLowerCase();
           const name = (l.name || '').toLowerCase();
@@ -88,7 +89,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           );
         });
 
-        // Mapa rápido de paradas por id
         const paradasPorId = {};
         paradas.forEach((p) => {
           paradasPorId[p.id] = p;
@@ -97,10 +97,8 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         linhasFiltradas.forEach((linha) => {
           const stopIds = linhaParaParadas[linha.code] || [];
 
-          // Limita para não explodir a lista (máx. 25 paradas por linha na busca)
-          const stopIdsLimitados = stopIds.slice(0, 25);
-
-          stopIdsLimitados.forEach((stopId) => {
+          // Sem limite — todas as paradas
+          stopIds.forEach((stopId) => {
             const parada = paradasPorId[stopId];
             if (!parada) return;
 
@@ -124,7 +122,6 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
             const name = (p.name || '').toLowerCase();
             return code.includes(q) || name.includes(q) || code.includes(qLimpo);
           })
-          .slice(0, 8)
           .map((p) => ({
             id: `stop-${p.id}`,
             title: `Parada ${p.code}`,
@@ -135,7 +132,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
             stopData: p
           }));
 
-        // Evita duplicar paradas que já vieram da busca por linha
+        // Evita duplicar paradas já listadas pela busca de linha
         const idsJaIncluidos = new Set(
           resultados.map((r) => r.stopData?.id).filter(Boolean)
         );
@@ -169,9 +166,8 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
           }
         }
 
-        // Limita total de resultados para não travar o celular
-        const todos = [...resultados, ...lugares].slice(0, 40);
-        setResults(todos);
+        // Sem limite de resultados
+        setResults([...resultados, ...lugares]);
       } catch (err) {
         console.error('Erro na busca:', err);
       } finally {
@@ -232,6 +228,7 @@ export default function SearchHeader({ onSelectDestination, onSelectStop }) {
         )}
       </div>
 
+      {/* Resultados */}
       {isOpen && results.length > 0 && (
         <div className="absolute top-12 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden max-h-80 overflow-y-auto z-50">
           {results.map((item) => (
