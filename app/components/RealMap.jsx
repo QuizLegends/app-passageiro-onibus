@@ -5,7 +5,7 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115];
 
-// Ícone HTML igual ao card (Lucide Bus)
+// Ícone HTML (Lucide Bus) — usado na parada selecionada
 function criarIconeOnibusVerde(size = 28) {
   const el = document.createElement('div');
   el.style.cssText = `
@@ -36,61 +36,58 @@ function criarIconeOnibusVerde(size = 28) {
   return el;
 }
 
-// Gera imagem do ícone para o Mapbox (todas as paradas)
+// Desenha o ícone direto no canvas (sem depender de Image/SVG async)
 function gerarImagemOnibusMapbox() {
-  return new Promise((resolve, reject) => {
-    const size = 64;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
 
-    // Fundo verde arredondado
-    const inset = 4;
-    const r = 16;
-    ctx.fillStyle = '#16a34a';
-    ctx.beginPath();
-    ctx.moveTo(inset + r, inset);
-    ctx.arcTo(size - inset, inset, size - inset, size - inset, r);
-    ctx.arcTo(size - inset, size - inset, inset, size - inset, r);
-    ctx.arcTo(inset, size - inset, inset, inset, r);
-    ctx.arcTo(inset, inset, size - inset, inset, r);
-    ctx.closePath();
-    ctx.fill();
+  // Fundo verde arredondado
+  const inset = 4;
+  const r = 16;
+  ctx.fillStyle = '#16a34a';
+  ctx.beginPath();
+  ctx.moveTo(inset + r, inset);
+  ctx.arcTo(size - inset, inset, size - inset, size - inset, r);
+  ctx.arcTo(size - inset, size - inset, inset, size - inset, r);
+  ctx.arcTo(inset, size - inset, inset, inset, r);
+  ctx.arcTo(inset, inset, size - inset, inset, r);
+  ctx.closePath();
+  ctx.fill();
 
-    // Borda branca
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 4;
-    ctx.stroke();
+  // Borda branca
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 4;
+  ctx.stroke();
 
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
-        fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M8 6v6"/>
-        <path d="M15 6v6"/>
-        <path d="M2 12h19.6"/>
-        <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
-        <circle cx="7" cy="18" r="2"/>
-        <path d="M9 18h6"/>
-        <circle cx="17" cy="18" r="2"/>
-      </svg>
-    `;
+  // Ônibus branco simples (visível e confiável)
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
 
-    const img = new Image();
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
+  // Corpo do ônibus
+  ctx.beginPath();
+  ctx.roundRect(16, 18, 32, 22, 4);
+  ctx.fill();
 
-    img.onload = () => {
-      ctx.drawImage(img, (size - 36) / 2, (size - 36) / 2, 36, 36);
-      URL.revokeObjectURL(url);
-      resolve(canvas);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      reject(new Error('Falha ao carregar SVG do ônibus'));
-    };
-    img.src = url;
-  });
+  // Janelas (recortes verdes)
+  ctx.fillStyle = '#16a34a';
+  ctx.fillRect(20, 22, 8, 7);
+  ctx.fillRect(30, 22, 8, 7);
+  ctx.fillRect(40, 22, 5, 7);
+
+  // Rodas
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(24, 42, 4, 0, Math.PI * 2);
+  ctx.arc(40, 42, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  return canvas;
 }
 
 const RealMap = forwardRef(
@@ -120,6 +117,33 @@ const RealMap = forwardRef(
     const [mensagemErro, setMensagemErro] = useState('');
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+
+    // Monta dados completos da parada (linhas + horários)
+    const montarStopCompleto = (stopBase) => {
+      const id = String(stopBase.id);
+      const codigosLinhas = paradaLinhas[id] || [];
+      const nomesLinhas = codigosLinhas.map((c) => linhasMap[c] || c);
+      const horariosDaParada = horarios[id] || {};
+
+      const linhasComHorarios = codigosLinhas.map((codigo) => ({
+        codigo,
+        nome: linhasMap[codigo] || codigo,
+        horarios: horariosDaParada[codigo] || []
+      }));
+
+      return {
+        id,
+        code: stopBase.code,
+        name: stopBase.name || `Parada ${stopBase.code}`,
+        street: stopBase.street || '',
+        locality: stopBase.locality || '',
+        lon: stopBase.lon,
+        lat: stopBase.lat,
+        routes: codigosLinhas,
+        routesNames: nomesLinhas,
+        linhasComHorarios
+      };
+    };
 
     useImperativeHandle(ref, () => ({
       recenter: () => {
@@ -178,10 +202,11 @@ const RealMap = forwardRef(
       carregarDados();
     }, []);
 
-    // Inicializa mapa
+    // Inicializa mapa + TODAS as paradas visíveis
     useEffect(() => {
       if (status !== 'pronto' || !token || mapRef.current || !mapContainerRef.current)
         return;
+      if (!paradas.length) return;
 
       mapboxgl.accessToken = token;
 
@@ -195,7 +220,7 @@ const RealMap = forwardRef(
 
       mapRef.current = map;
 
-      map.on('load', async () => {
+      map.on('load', () => {
         setTimeout(() => map.resize(), 200);
 
         const features = paradas.map((parada) => ({
@@ -207,7 +232,7 @@ const RealMap = forwardRef(
           properties: {
             id: String(parada.id),
             code: parada.code,
-            name: parada.name
+            name: parada.name || `Parada ${parada.code}`
           }
         }));
 
@@ -216,38 +241,23 @@ const RealMap = forwardRef(
           data: { type: 'FeatureCollection', features }
         });
 
-        // Ícone em TODAS as paradas
-        try {
-          const canvas = await gerarImagemOnibusMapbox();
-          if (!map.hasImage('bus-lucide')) {
-            map.addImage('bus-lucide', canvas);
-          }
-
-          map.addLayer({
-            id: 'bus-stops-icon',
-            type: 'symbol',
-            source: 'bus-stops-source',
-            layout: {
-              'icon-image': 'bus-lucide',
-              'icon-size': 0.5,
-              'icon-allow-overlap': true,
-              'icon-ignore-placement': true
-            }
-          });
-        } catch (err) {
-          console.error('Erro no ícone, usando fallback 🚌', err);
-          map.addLayer({
-            id: 'bus-stops-icon',
-            type: 'symbol',
-            source: 'bus-stops-source',
-            layout: {
-              'text-field': '🚌',
-              'text-size': 18,
-              'text-allow-overlap': true,
-              'text-ignore-placement': true
-            }
-          });
+        // Ícone em TODAS as paradas (canvas síncrono — confiável)
+        const canvas = gerarImagemOnibusMapbox();
+        if (!map.hasImage('bus-lucide')) {
+          map.addImage('bus-lucide', canvas);
         }
+
+        map.addLayer({
+          id: 'bus-stops-icon',
+          type: 'symbol',
+          source: 'bus-stops-source',
+          layout: {
+            'icon-image': 'bus-lucide',
+            'icon-size': 0.55,
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true
+          }
+        });
 
         // Rota a pé
         map.addSource('route', {
@@ -270,7 +280,7 @@ const RealMap = forwardRef(
           }
         });
 
-        // Clique
+        // Clique na parada → abre o card com linhas e horários
         map.on('click', 'bus-stops-icon', (e) => {
           if (!e.features || e.features.length === 0) return;
 
@@ -278,40 +288,17 @@ const RealMap = forwardRef(
           const coordinates = feature.geometry.coordinates.slice();
           const props = feature.properties;
 
-          const codigosLinhas = paradaLinhas[props.id] || [];
-          const nomesLinhas = codigosLinhas.map((c) => linhasMap[c] || c);
-          const horariosDaParada = horarios[props.id] || {};
-
-          const linhasComHorarios = codigosLinhas.map((codigo) => ({
-            codigo,
-            nome: linhasMap[codigo] || codigo,
-            horarios: horariosDaParada[codigo] || []
-          }));
-
           if (onSelectStop) {
-            onSelectStop({
-              id: props.id,
-              code: props.code,
-              name: `Parada ${props.code}`,
-              lon: coordinates[0],
-              lat: coordinates[1],
-              routes: codigosLinhas,
-              routesNames: nomesLinhas,
-              linhasComHorarios
-            });
+            onSelectStop(
+              montarStopCompleto({
+                id: props.id,
+                code: props.code,
+                name: props.name,
+                lon: coordinates[0],
+                lat: coordinates[1]
+              })
+            );
           }
-
-          new mapboxgl.Popup({ offset: 15, maxWidth: '260px' })
-            .setLngLat(coordinates)
-            .setHTML(`
-              <div style="font-family: sans-serif; padding: 4px;">
-                <strong style="font-size: 14px; color: #0f172a;">🚏 Parada ${props.code}</strong>
-                <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                  ${nomesLinhas.length} linha(s) passam aqui
-                </div>
-              </div>
-            `)
-            .addTo(map);
         });
 
         map.on('mouseenter', 'bus-stops-icon', () => {
@@ -322,7 +309,7 @@ const RealMap = forwardRef(
         });
       });
 
-      // GPS azul pulsando (circular)
+      // GPS
       if (typeof window !== 'undefined' && navigator.geolocation) {
         navigator.geolocation.watchPosition(
           (pos) => {
@@ -353,9 +340,9 @@ const RealMap = forwardRef(
           mapRef.current = null;
         }
       };
-    }, [status, token, paradas, paradaLinhas, linhasMap, horarios]);
+    }, [status, token, paradas]);
 
-    // Lugar da pesquisa
+    // Pesquisa de LUGAR
     useEffect(() => {
       if (!mapRef.current || !targetDestination) return;
       if (!targetDestination.lon || !targetDestination.lat) return;
@@ -368,9 +355,7 @@ const RealMap = forwardRef(
         essential: true
       });
 
-      if (destMarkerRef.current) {
-        destMarkerRef.current.remove();
-      }
+      if (destMarkerRef.current) destMarkerRef.current.remove();
 
       const el = document.createElement('div');
       el.style.cssText =
@@ -381,7 +366,7 @@ const RealMap = forwardRef(
         .addTo(mapRef.current);
     }, [targetDestination]);
 
-    // Parada selecionada → mesmo ícone + pulso CIRCULAR
+    // Parada selecionada (mapa OU pesquisa) → pulso + garante dados do card
     useEffect(() => {
       if (!mapRef.current || !selectedStop) return;
       if (!selectedStop.lon || !selectedStop.lat) return;
@@ -394,6 +379,19 @@ const RealMap = forwardRef(
         zoom: 17,
         essential: true
       });
+
+      // Se veio da pesquisa sem linhas/horários, completa e reenvia ao card
+      if (
+        onSelectStop &&
+        (!selectedStop.linhasComHorarios ||
+          selectedStop.linhasComHorarios.length === 0)
+      ) {
+        const completo = montarStopCompleto(selectedStop);
+        // só reenvia se realmente houver algo a completar
+        if (completo.linhasComHorarios.length > 0 || completo.code) {
+          onSelectStop(completo);
+        }
+      }
 
       if (selectedMarkerRef.current) {
         selectedMarkerRef.current.remove();
@@ -459,17 +457,17 @@ const RealMap = forwardRef(
           if (!data.routes || data.routes.length === 0) return;
 
           const route = data.routes[0];
-          const geojson = {
-            type: 'Feature',
-            properties: {},
-            geometry: route.geometry
-          };
-
           const source = mapRef.current.getSource('route');
           if (source) {
             source.setData({
               type: 'FeatureCollection',
-              features: [geojson]
+              features: [
+                {
+                  type: 'Feature',
+                  properties: {},
+                  geometry: route.geometry
+                }
+              ]
             });
           }
 
@@ -504,7 +502,6 @@ const RealMap = forwardRef(
       <div className="w-full h-full min-h-full relative bg-slate-200">
         <div ref={mapContainerRef} className="absolute inset-0 w-full h-full" />
 
-        {/* Botão minha localização */}
         <button
           type="button"
           onClick={() => {
@@ -552,7 +549,6 @@ const RealMap = forwardRef(
             }
           }
 
-          /* GPS — pulso circular */
           .pulse-dot {
             position: relative;
             width: 18px;
@@ -581,7 +577,6 @@ const RealMap = forwardRef(
             box-sizing: border-box;
           }
 
-          /* Parada selecionada — pulso CIRCULAR em volta do ícone */
           .pulse-bus-green {
             position: relative;
             width: 40px;
