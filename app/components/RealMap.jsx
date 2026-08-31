@@ -146,7 +146,7 @@ const RealMap = forwardRef(
       carregarDados();
     }, []);
 
-    // Mapa + paradas (emoji 🚌 — método que já funcionou)
+    // Mapa + paradas com 🚍
     useEffect(() => {
       if (status !== 'pronto' || !token || mapRef.current || !mapContainerRef.current)
         return;
@@ -185,20 +185,20 @@ const RealMap = forwardRef(
           data: { type: 'FeatureCollection', features }
         });
 
-        // TODAS as paradas visíveis no mapa
+        // TODAS as paradas — ônibus de frente
         map.addLayer({
           id: 'bus-stops-icon',
           type: 'symbol',
           source: 'bus-stops-source',
           layout: {
-            'text-field': '🚌',
+            'text-field': '🚍',
             'text-size': 20,
             'text-allow-overlap': true,
             'text-ignore-placement': true
           }
         });
 
-        // Fonte da rota a pé
+        // Rota a pé
         map.addSource('route', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features: [] }
@@ -310,7 +310,6 @@ const RealMap = forwardRef(
         essential: true
       });
 
-      // Completa linhas/horários se veio da pesquisa
       if (
         onSelectStop &&
         (!selectedStop.linhasComHorarios ||
@@ -347,7 +346,7 @@ const RealMap = forwardRef(
       };
     }, [selectedStop]);
 
-    // Rota a pé (corrigida)
+    // Rota a pé
     useEffect(() => {
       if (!mapRef.current || !token) return;
 
@@ -427,7 +426,6 @@ const RealMap = forwardRef(
           });
       };
 
-      // Usa GPS atual; se não tiver, pede uma vez
       const origin = userPosRef.current || userPos;
 
       if (origin) {
@@ -442,7 +440,6 @@ const RealMap = forwardRef(
           },
           (err) => {
             console.warn('GPS para rota:', err.message);
-            // Sem GPS: só centraliza na parada
             map.flyTo({
               center: [stop.lon, stop.lat],
               zoom: 16,
