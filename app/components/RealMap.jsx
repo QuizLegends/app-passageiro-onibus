@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from 'react';
 import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const defaultCenter = [-34.918, -8.115];
 
@@ -52,12 +53,10 @@ const RealMap = forwardRef(
     const destMarkerRef = useRef(null);
     const selectedMarkerRef = useRef(null);
     const userPosRef = useRef(null);
+    const dataRef = useRef({ paradaLinhas: {}, linhasMap: {}, horarios: {} });
 
     const [userPos, setUserPos] = useState(null);
     const [paradas, setParadas] = useState([]);
-    const [paradaLinhas, setParadaLinhas] = useState({});
-    const [linhasMap, setLinhasMap] = useState({});
-    const [horarios, setHorarios] = useState({});
     const [status, setStatus] = useState('carregando');
     const [mensagemErro, setMensagemErro] = useState('');
 
@@ -65,6 +64,7 @@ const RealMap = forwardRef(
 
     const montarStopCompleto = (stopBase) => {
       const id = String(stopBase.id);
+      const { paradaLinhas, linhasMap, horarios } = dataRef.current;
       const codigosLinhas = paradaLinhas[id] || [];
       const nomesLinhas = codigosLinhas.map((c) => linhasMap[c] || c);
       const horariosDaParada = horarios[id] || {};
@@ -102,7 +102,7 @@ const RealMap = forwardRef(
       }
     }));
 
-    // Carrega dados
+    // 1) Carrega JSON
     useEffect(() => {
       async function carregarDados() {
         try {
@@ -131,11 +131,15 @@ const RealMap = forwardRef(
             mapa[linha.code] = `${linha.code} - ${linha.name}`;
           });
 
+          dataRef.current = {
+            paradaLinhas: dadosParadaLinhas,
+            linhasMap: mapa,
+            horarios: dadosHorarios
+          };
+
           setParadas(dadosParadas);
-          setParadaLinhas(dadosParadaLinhas);
-          setLinhasMap(mapa);
-          setHorarios(dadosHorarios);
           setStatus('pronto');
+          console.log('Paradas carregadas:', dadosParadas.length);
         } catch (err) {
           console.error(err);
           setMensagemErro(err.message || 'Erro desconhecido');
@@ -146,11 +150,39 @@ const RealMap = forwardRef(
       carregarDados();
     }, []);
 
-    // Mapa + paradas com 🚍
+    // 2) Cria o mapa e desenha TODAS as paradas
     useEffect(() => {
-      if (status !== 'pronto' || !token || mapRef.current || !mapContainerRef.current)
+      if (status !== 'pronto') return;
+      if (!token) {
+        setMensagemErro('Token Mapbox ausente (NEXT_PUBLIC_MAPBOX_TOKEN)');
+        setStatus('erro');
         return;
+      }
       if (!paradas.length) return;
+      if (!mapContainerRef.current) return;
+
+      // Se já existe mapa, só atualiza a source
+      if (mapRef.current) {
+        const source = mapRef.current.getSource('bus-stops-source');
+        if (source) {
+          source.setData({
+            type: 'FeatureCollection',
+            features: paradas.map((p) => ({
+              type: 'Feature',
+              geometry: {
+                type: 'Point',
+                coordinates: [Number(p.lon), Number(p.lat)]
+              },
+              properties: {
+                id: String(p.id),
+                code: String(p.code),
+                name: p.name || `Parada ${p.code}`
+              }
+            }))
+          });
+        }
+        return;
+      }
 
       mapboxgl.accessToken = token;
 
@@ -158,41 +190,57 @@ const RealMap = forwardRef(
         container: mapContainerRef.current,
         style: 'mapbox://styles/mapbox/streets-v12',
         center: defaultCenter,
-        zoom: 15,
+        zoom: 14,
         attributionControl: false
       });
 
       mapRef.current = map;
 
       map.on('load', () => {
-        setTimeout(() => map.resize(), 200);
+        map.resize();
 
-        const features = paradas.map((parada) => ({
+        const features = paradas.map((p) => ({
           type: 'Feature',
           geometry: {
             type: 'Point',
-            coordinates: [parada.lon, parada.lat]
+            coordinates: [Number(p.lon), Number(p.lat)]
           },
           properties: {
-            id: String(parada.id),
-            code: parada.code,
-            name: parada.name || `Parada ${parada.code}`
+            id: String(p.id),
+            code: String(p.code),
+            name: p.name || `Parada ${p.code}`
           }
         }));
+
+        console.log('Features no mapa:', features.length);
+        console.log('Exemplo feature:', features[0]);
 
         map.addSource('bus-stops-source', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features }
         });
 
-        // TODAS as paradas — ônibus de frente
+        // Círculo verde (garante visibilidade)
+        map.addLayer({
+          id: 'bus-stops-circle',
+          type: 'circle',
+          source: 'bus-stops-source',
+          paint: {
+            'circle-color': '#16a34a',
+            'circle-radius': 12,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#ffffff'
+          }
+        });
+
+        // Ônibus de frente em cima
         map.addLayer({
           id: 'bus-stops-icon',
           type: 'symbol',
           source: 'bus-stops-source',
           layout: {
             'text-field': '🚍',
-            'text-size': 20,
+            'text-size': 16,
             'text-allow-overlap': true,
             'text-ignore-placement': true
           }
@@ -219,10 +267,8 @@ const RealMap = forwardRef(
           }
         });
 
-        // Clique → abre card
-        map.on('click', 'bus-stops-icon', (e) => {
+        const onClickStop = (e) => {
           if (!e.features?.length) return;
-
           const feature = e.features[0];
           const coordinates = feature.geometry.coordinates.slice();
           const props = feature.properties;
@@ -238,14 +284,19 @@ const RealMap = forwardRef(
               })
             );
           }
-        });
+        };
 
-        map.on('mouseenter', 'bus-stops-icon', () => {
+        map.on('click', 'bus-stops-circle', onClickStop);
+        map.on('click', 'bus-stops-icon', onClickStop);
+
+        map.on('mouseenter', 'bus-stops-circle', () => {
           map.getCanvas().style.cursor = 'pointer';
         });
-        map.on('mouseleave', 'bus-stops-icon', () => {
+        map.on('mouseleave', 'bus-stops-circle', () => {
           map.getCanvas().style.cursor = '';
         });
+
+        setTimeout(() => map.resize(), 300);
       });
 
       // GPS
@@ -331,6 +382,10 @@ const RealMap = forwardRef(
         .setLngLat([selectedStop.lon, selectedStop.lat])
         .addTo(map);
 
+      // Esconde o ponto original dessa parada
+      if (map.getLayer('bus-stops-circle')) {
+        map.setFilter('bus-stops-circle', ['!=', ['get', 'id'], stopId]);
+      }
       if (map.getLayer('bus-stops-icon')) {
         map.setFilter('bus-stops-icon', ['!=', ['get', 'id'], stopId]);
       }
@@ -339,6 +394,9 @@ const RealMap = forwardRef(
         if (selectedMarkerRef.current) {
           selectedMarkerRef.current.remove();
           selectedMarkerRef.current = null;
+        }
+        if (map.getLayer('bus-stops-circle')) {
+          map.setFilter('bus-stops-circle', null);
         }
         if (map.getLayer('bus-stops-icon')) {
           map.setFilter('bus-stops-icon', null);
@@ -349,7 +407,6 @@ const RealMap = forwardRef(
     // Rota a pé
     useEffect(() => {
       if (!mapRef.current || !token) return;
-
       const map = mapRef.current;
 
       const limparRota = () => {
@@ -385,13 +442,12 @@ const RealMap = forwardRef(
           .then((res) => res.json())
           .then((data) => {
             if (!data.routes?.length) {
-              console.warn('Nenhuma rota retornada:', data);
+              console.warn('Nenhuma rota:', data);
               return;
             }
 
             const route = data.routes[0];
             const source = map.getSource('route');
-
             if (source) {
               source.setData({
                 type: 'FeatureCollection',
@@ -421,16 +477,14 @@ const RealMap = forwardRef(
               map.fitBounds(bounds, { padding: 70, duration: 1000 });
             }
           })
-          .catch((err) => {
-            console.error('Erro na rota a pé:', err);
-          });
+          .catch((err) => console.error('Erro rota:', err));
       };
 
       const origin = userPosRef.current || userPos;
 
       if (origin) {
         traçarRota(origin);
-      } else if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      } else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (pos) => {
             const coords = [pos.coords.longitude, pos.coords.latitude];
@@ -438,8 +492,7 @@ const RealMap = forwardRef(
             userPosRef.current = coords;
             traçarRota(coords);
           },
-          (err) => {
-            console.warn('GPS para rota:', err.message);
+          () => {
             map.flyTo({
               center: [stop.lon, stop.lat],
               zoom: 16,
@@ -448,12 +501,6 @@ const RealMap = forwardRef(
           },
           { enableHighAccuracy: true, timeout: 10000 }
         );
-      } else {
-        map.flyTo({
-          center: [stop.lon, stop.lat],
-          zoom: 16,
-          essential: true
-        });
       }
     }, [selectedStopForRoute, token]);
 
@@ -518,7 +565,6 @@ const RealMap = forwardRef(
               opacity: 0;
             }
           }
-
           .pulse-dot {
             position: relative;
             width: 18px;
@@ -546,7 +592,6 @@ const RealMap = forwardRef(
             z-index: 1;
             box-sizing: border-box;
           }
-
           .pulse-bus-green {
             position: relative;
             width: 40px;
