@@ -5,7 +5,6 @@ import mapboxgl from 'mapbox-gl';
 
 const defaultCenter = [-34.918, -8.115];
 
-// Ícone HTML (Lucide Bus) — usado na parada selecionada
 function criarIconeOnibusVerde(size = 28) {
   const el = document.createElement('div');
   el.style.cssText = `
@@ -36,60 +35,6 @@ function criarIconeOnibusVerde(size = 28) {
   return el;
 }
 
-// Desenha o ícone direto no canvas (sem depender de Image/SVG async)
-function gerarImagemOnibusMapbox() {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  // Fundo verde arredondado
-  const inset = 4;
-  const r = 16;
-  ctx.fillStyle = '#16a34a';
-  ctx.beginPath();
-  ctx.moveTo(inset + r, inset);
-  ctx.arcTo(size - inset, inset, size - inset, size - inset, r);
-  ctx.arcTo(size - inset, size - inset, inset, size - inset, r);
-  ctx.arcTo(inset, size - inset, inset, inset, r);
-  ctx.arcTo(inset, inset, size - inset, inset, r);
-  ctx.closePath();
-  ctx.fill();
-
-  // Borda branca
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 4;
-  ctx.stroke();
-
-  // Ônibus branco simples (visível e confiável)
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 2;
-  ctx.lineJoin = 'round';
-  ctx.lineCap = 'round';
-
-  // Corpo do ônibus
-  ctx.beginPath();
-  ctx.roundRect(16, 18, 32, 22, 4);
-  ctx.fill();
-
-  // Janelas (recortes verdes)
-  ctx.fillStyle = '#16a34a';
-  ctx.fillRect(20, 22, 8, 7);
-  ctx.fillRect(30, 22, 8, 7);
-  ctx.fillRect(40, 22, 5, 7);
-
-  // Rodas
-  ctx.fillStyle = '#ffffff';
-  ctx.beginPath();
-  ctx.arc(24, 42, 4, 0, Math.PI * 2);
-  ctx.arc(40, 42, 4, 0, Math.PI * 2);
-  ctx.fill();
-
-  return canvas;
-}
-
 const RealMap = forwardRef(
   (
     {
@@ -118,7 +63,6 @@ const RealMap = forwardRef(
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
-    // Monta dados completos da parada (linhas + horários)
     const montarStopCompleto = (stopBase) => {
       const id = String(stopBase.id);
       const codigosLinhas = paradaLinhas[id] || [];
@@ -202,7 +146,7 @@ const RealMap = forwardRef(
       carregarDados();
     }, []);
 
-    // Inicializa mapa + TODAS as paradas visíveis
+    // Mapa + paradas (emoji 🚌 — método que já funcionou)
     useEffect(() => {
       if (status !== 'pronto' || !token || mapRef.current || !mapContainerRef.current)
         return;
@@ -241,25 +185,20 @@ const RealMap = forwardRef(
           data: { type: 'FeatureCollection', features }
         });
 
-        // Ícone em TODAS as paradas (canvas síncrono — confiável)
-        const canvas = gerarImagemOnibusMapbox();
-        if (!map.hasImage('bus-lucide')) {
-          map.addImage('bus-lucide', canvas);
-        }
-
+        // TODAS as paradas visíveis no mapa
         map.addLayer({
           id: 'bus-stops-icon',
           type: 'symbol',
           source: 'bus-stops-source',
           layout: {
-            'icon-image': 'bus-lucide',
-            'icon-size': 0.55,
-            'icon-allow-overlap': true,
-            'icon-ignore-placement': true
+            'text-field': '🚌',
+            'text-size': 20,
+            'text-allow-overlap': true,
+            'text-ignore-placement': true
           }
         });
 
-        // Rota a pé
+        // Fonte da rota a pé
         map.addSource('route', {
           type: 'geojson',
           data: { type: 'FeatureCollection', features: [] }
@@ -276,13 +215,13 @@ const RealMap = forwardRef(
           paint: {
             'line-color': '#7c3aed',
             'line-width': 5,
-            'line-opacity': 0.85
+            'line-opacity': 0.9
           }
         });
 
-        // Clique na parada → abre o card com linhas e horários
+        // Clique → abre card
         map.on('click', 'bus-stops-icon', (e) => {
-          if (!e.features || e.features.length === 0) return;
+          if (!e.features?.length) return;
 
           const feature = e.features[0];
           const coordinates = feature.geometry.coordinates.slice();
@@ -321,7 +260,6 @@ const RealMap = forwardRef(
               const el = document.createElement('div');
               el.className = 'pulse-dot';
               el.innerHTML = '<div class="pulse-dot-core"></div>';
-
               userMarkerRef.current = new mapboxgl.Marker({ element: el })
                 .setLngLat(coords)
                 .addTo(map);
@@ -330,7 +268,7 @@ const RealMap = forwardRef(
             }
           },
           (err) => console.warn('GPS:', err.message),
-          { enableHighAccuracy: true, timeout: 10000 }
+          { enableHighAccuracy: true, timeout: 15000, maximumAge: 5000 }
         );
       }
 
@@ -342,34 +280,26 @@ const RealMap = forwardRef(
       };
     }, [status, token, paradas]);
 
-    // Pesquisa de LUGAR
+    // Lugar da pesquisa
     useEffect(() => {
-      if (!mapRef.current || !targetDestination) return;
-      if (!targetDestination.lon || !targetDestination.lat) return;
+      if (!mapRef.current || !targetDestination?.lon || !targetDestination?.lat) return;
 
       const coords = [targetDestination.lon, targetDestination.lat];
-
-      mapRef.current.flyTo({
-        center: coords,
-        zoom: 16,
-        essential: true
-      });
+      mapRef.current.flyTo({ center: coords, zoom: 16, essential: true });
 
       if (destMarkerRef.current) destMarkerRef.current.remove();
 
       const el = document.createElement('div');
       el.style.cssText =
         'width: 22px; height: 22px; background-color: #dc2626; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(220,38,38,0.6);';
-
       destMarkerRef.current = new mapboxgl.Marker(el)
         .setLngLat(coords)
         .addTo(mapRef.current);
     }, [targetDestination]);
 
-    // Parada selecionada (mapa OU pesquisa) → pulso + garante dados do card
+    // Parada selecionada
     useEffect(() => {
-      if (!mapRef.current || !selectedStop) return;
-      if (!selectedStop.lon || !selectedStop.lat) return;
+      if (!mapRef.current || !selectedStop?.lon || !selectedStop?.lat) return;
 
       const map = mapRef.current;
       const stopId = String(selectedStop.id);
@@ -380,17 +310,13 @@ const RealMap = forwardRef(
         essential: true
       });
 
-      // Se veio da pesquisa sem linhas/horários, completa e reenvia ao card
+      // Completa linhas/horários se veio da pesquisa
       if (
         onSelectStop &&
         (!selectedStop.linhasComHorarios ||
           selectedStop.linhasComHorarios.length === 0)
       ) {
-        const completo = montarStopCompleto(selectedStop);
-        // só reenvia se realmente houver algo a completar
-        if (completo.linhasComHorarios.length > 0 || completo.code) {
-          onSelectStop(completo);
-        }
+        onSelectStop(montarStopCompleto(selectedStop));
       }
 
       if (selectedMarkerRef.current) {
@@ -421,81 +347,117 @@ const RealMap = forwardRef(
       };
     }, [selectedStop]);
 
-    // Rota a pé
+    // Rota a pé (corrigida)
     useEffect(() => {
-      if (!mapRef.current) return;
+      if (!mapRef.current || !token) return;
 
-      if (!selectedStopForRoute) {
-        const source = mapRef.current.getSource('route');
+      const map = mapRef.current;
+
+      const limparRota = () => {
+        const source = map.getSource('route');
         if (source) {
           source.setData({ type: 'FeatureCollection', features: [] });
         }
         if (onRouteInfo) onRouteInfo(null);
+      };
+
+      if (!selectedStopForRoute) {
+        limparRota();
         return;
       }
 
       const stop = selectedStopForRoute;
+
+      const traçarRota = (origin) => {
+        if (!origin || !stop.lon || !stop.lat) {
+          map.flyTo({
+            center: [stop.lon, stop.lat],
+            zoom: 16,
+            essential: true
+          });
+          return;
+        }
+
+        const start = `${origin[0]},${origin[1]}`;
+        const end = `${stop.lon},${stop.lat}`;
+        const url = `https://api.mapbox.com/directions/v5/mapbox/walking/${start};${end}?geometries=geojson&overview=full&access_token=${token}`;
+
+        fetch(url)
+          .then((res) => res.json())
+          .then((data) => {
+            if (!data.routes?.length) {
+              console.warn('Nenhuma rota retornada:', data);
+              return;
+            }
+
+            const route = data.routes[0];
+            const source = map.getSource('route');
+
+            if (source) {
+              source.setData({
+                type: 'FeatureCollection',
+                features: [
+                  {
+                    type: 'Feature',
+                    properties: {},
+                    geometry: route.geometry
+                  }
+                ]
+              });
+            }
+
+            if (onRouteInfo) {
+              onRouteInfo({
+                distance: route.distance,
+                duration: route.duration
+              });
+            }
+
+            const coordinates = route.geometry.coordinates;
+            if (coordinates?.length) {
+              const bounds = coordinates.reduce(
+                (b, coord) => b.extend(coord),
+                new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
+              );
+              map.fitBounds(bounds, { padding: 70, duration: 1000 });
+            }
+          })
+          .catch((err) => {
+            console.error('Erro na rota a pé:', err);
+          });
+      };
+
+      // Usa GPS atual; se não tiver, pede uma vez
       const origin = userPosRef.current || userPos;
 
-      if (!origin || !stop.lon || !stop.lat) {
-        mapRef.current.flyTo({
+      if (origin) {
+        traçarRota(origin);
+      } else if (typeof navigator !== 'undefined' && navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const coords = [pos.coords.longitude, pos.coords.latitude];
+            setUserPos(coords);
+            userPosRef.current = coords;
+            traçarRota(coords);
+          },
+          (err) => {
+            console.warn('GPS para rota:', err.message);
+            // Sem GPS: só centraliza na parada
+            map.flyTo({
+              center: [stop.lon, stop.lat],
+              zoom: 16,
+              essential: true
+            });
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      } else {
+        map.flyTo({
           center: [stop.lon, stop.lat],
           zoom: 16,
           essential: true
         });
-        return;
       }
-
-      const start = origin.join(',');
-      const end = `${stop.lon},${stop.lat}`;
-
-      fetch(
-        `https://api.mapbox.com/directions/v5/mapbox/walking/${start};${end}?geometries=geojson&access_token=${token}`
-      )
-        .then((res) => res.json())
-        .then((data) => {
-          if (!data.routes || data.routes.length === 0) return;
-
-          const route = data.routes[0];
-          const source = mapRef.current.getSource('route');
-          if (source) {
-            source.setData({
-              type: 'FeatureCollection',
-              features: [
-                {
-                  type: 'Feature',
-                  properties: {},
-                  geometry: route.geometry
-                }
-              ]
-            });
-          }
-
-          if (onRouteInfo) {
-            onRouteInfo({
-              distance: route.distance,
-              duration: route.duration
-            });
-          }
-
-          const coordinates = route.geometry.coordinates;
-          const bounds = coordinates.reduce(
-            (b, coord) => b.extend(coord),
-            new mapboxgl.LngLatBounds(coordinates[0], coordinates[0])
-          );
-
-          mapRef.current.fitBounds(bounds, {
-            padding: 60,
-            duration: 1000
-          });
-        })
-        .catch((err) => {
-          console.error('Erro ao traçar rota:', err);
-          mapRef.current.flyTo({
-            center: [stop.lon, stop.lat],
-            zoom: 16
-          });
-        });
     }, [selectedStopForRoute, token]);
 
     return (
@@ -511,6 +473,17 @@ const RealMap = forwardRef(
                 center: currentPos,
                 zoom: 16,
                 essential: true
+              });
+            } else if (navigator.geolocation) {
+              navigator.geolocation.getCurrentPosition((pos) => {
+                const coords = [pos.coords.longitude, pos.coords.latitude];
+                setUserPos(coords);
+                userPosRef.current = coords;
+                mapRef.current?.flyTo({
+                  center: coords,
+                  zoom: 16,
+                  essential: true
+                });
               });
             }
           }}
